@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sample Merchant</title>
+
+    <style media="screen">
+      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
+      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
+      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
+      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
+      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
+      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; font-weight: bold; color: white; padding: 16px; border-radius: 4px; }
+      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+      @media (max-width: 600px) {
+        body, #message { margin-top: 0; background: white; box-shadow: none; }
+        body { border-top: 16px solid #ffa100; }
+      }
+
+      #field { font-family: monospace; margin: 16px 0; }
+      .error { color: red; margin: 8px 0; }
+      .debug { color: green; margin: 8px 0; }
+    </style>
+  </head>
+  <body>
+    <div id="message">
+      <h2>Welcome</h2>
+      <h1>Sample Merchant</h1>
+      <p>This is a sample merchant page.</p>
+      <a id="pay">Pay</a>
+      <div id="field"></div>
+    </div>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        const field = document.getElementById('field');
+
+        const log = {
+          e: function (message) {
+            let div = document.createElement('div');
+            div.className = 'error';
+            div.textContent = message;
+            field.prepend(div);
+            console.error(message);
+          },
+          d: function (message) {
+            let div = document.createElement('div');
+            div.className = 'debug';
+            div.textContent = message;
+            field.prepend(div);
+            console.log(message);
+          }
+        };
+
+        function buildPaymentRequest() {
+          if (!window.PaymentRequest) {
+            return null;
+          }
+          const supportedInstruments = [
+            // TODO: Replace this with SamplePay.
+            { supportedMethods: 'https://bobpay.xyz/pay' },
+            { supportedMethods: 'interledger' }
+          ];
+          const details = {
+            total: {
+              label: 'Total',
+              amount: {
+                currency: 'USD',
+                value: '25.00',
+              },
+            },
+            displayItems: [
+              {
+                label: 'Merchandise 1',
+                amount: {
+                  currency: 'USD',
+                  value: '15.00',
+                },
+              },
+              {
+                label: 'Merchandise 2',
+                amount: {
+                  currency: 'USD',
+                  value: '10.00',
+                },
+              }
+            ],
+          };
+          const request = new PaymentRequest(supportedInstruments, details);
+          if (request.canMakePayment) {
+            request
+              .canMakePayment()
+              .then(function (result) {
+                log.d(result ? 'Can make payment' : 'Cannot make payment');
+              })
+              .catch(function (e) {
+                log.e(e);
+              });
+          }
+          if (request.hasEnrolledInsrument) {
+            request
+              .hasEnrolledInsrument()
+              .then(function (result) {
+                log.d(result ? 'Has enrolled instrument' : 'No enrolled instrument')
+              })
+              .catch(function (e) {
+                log.e(e);
+              })
+          }
+          return request;
+        }
+
+        let request = buildPaymentRequest();
+
+        function handlePaymentResponse(response) {
+          window.setTimeout(function () {
+            response
+              .complete('success')
+              .then(function () {
+                log.d(`Payment done: ${JSON.stringify(response, undefined, 2)}`);
+              })
+              .catch(function (e) {
+                log.e(e);
+              })
+            request = buildPaymentRequest();
+          }, 500);
+        }
+
+        const pay = document.getElementById('pay');
+        pay.addEventListener('click', function () {
+          if (!window.PaymentRequest) {
+            log.e('Payment not supported');
+            return;
+          }
+          try {
+            log.d(`Start payment (requestId: ${request.id})`)
+            request
+              .show()
+              .then(handlePaymentResponse)
+              .catch(function (e) {
+                log.e(e);
+                request = buildPaymentRequest();
+              })
+          } catch (e) {
+            log.e(`API error: ${e.message}`)
+            request = buildPaymentRequest();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

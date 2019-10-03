@@ -1,0 +1,21 @@
+{
+  "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "headers": [
+      {
+        "source": "/",
+        "headers": [
+          {
+            "key": "Link",
+            "value": "<https://sample-pay-e6bb3.firebaseapp.com/payment-manifest.json>; rel=\"payment-method-manifest\""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -16,4 +16,13 @@
 -->
 <resources>
     <string name="app_name">SamplePay</string>
+
+    <string name="home_explanation">
+        This is a sample payment app. Use the SampleMerchant web site to initiate a transaction.
+    </string>
+    <string name="total_format">Total: %s %s</string>
+    <string name="payment_explanation">
+        This is a sample payment app, and no actual payment will be processed.
+    </string>
+    <string name="pay">Pay</string>
 </resources>

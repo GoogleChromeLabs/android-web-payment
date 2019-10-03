@@ -15,6 +15,8 @@
   ~ limitations under the License.
 -->
 <resources>
-    <dimen name="toolbar_elevation">4dp</dimen>
-    <dimen name="spacing_medium">16dp</dimen>
+    <string-array name="method_names">
+        <item>https://sample-pay-e6bb3.firebaseapp.com</item>
+        <item>basic-card</item>
+    </string-array>
 </resources>

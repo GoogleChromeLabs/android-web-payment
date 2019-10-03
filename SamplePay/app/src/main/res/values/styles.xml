@@ -14,11 +14,21 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.SamplePay" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor" tools:targetApi="21">@color/navigationBarColor</item>
+        <item name="android:statusBarColor" tools:targetApi="21">@android:color/transparent</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryVariant">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/primary_text</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorSecondaryVariant">@color/secondary_light</item>
+        <item name="colorOnSecondary">@color/secondary_text</item>
+    </style>
+
+    <style name="Theme.SamplePay.Dialog" parent="Theme.MaterialComponents.DayNight.Dialog">
+        <item name="windowNoTitle">true</item>
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_dark</item>
         <item name="colorOnPrimary">@color/primary_text</item>

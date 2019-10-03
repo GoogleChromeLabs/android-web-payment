@@ -1,0 +1,8 @@
+{
+  "default_applications": [
+    "https://sample-pay-e6bb3.firebaseapp.com/manifest.json"
+  ],
+  "supported_origins": [
+    "https://sample-pay-e6bb3.firebaseapp.com"
+  ]
+}

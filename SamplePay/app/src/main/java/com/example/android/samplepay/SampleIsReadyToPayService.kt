@@ -20,15 +20,19 @@ import android.app.Service
 import android.content.Intent
 import android.os.IBinder
 import android.os.RemoteException
+import android.util.Log
+import com.example.android.samplepay.model.IsReadyToPayParams
 import org.chromium.IsReadyToPayService
 import org.chromium.IsReadyToPayServiceCallback
 
+private const val TAG = "IsReadyToPayService"
+
 class SampleIsReadyToPayService : Service() {
 
-    private val binder = object : IsReadyToPayService.Stub() {
+    private val acceptingBinder = object : IsReadyToPayService.Stub() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
             try {
-                println("# isReadyToPay")
+                Log.d(TAG, "IsReadyToPay: true")
                 callback?.handleIsReadyToPay(true)
             } catch (e: RemoteException) {
                 // Ignore
@@ -36,7 +40,32 @@ class SampleIsReadyToPayService : Service() {
         }
     }
 
+    private val rejectingBinder = object : IsReadyToPayService.Stub() {
+        override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
+            try {
+                Log.d(TAG, "IsReadyToPay: false")
+                callback?.handleIsReadyToPay(false)
+            } catch (e: RemoteException) {
+                // Ignore
+            }
+        }
+    }
+
     override fun onBind(intent: Intent?): IBinder? {
-        return binder
+        val extras = intent?.extras ?: return rejectingBinder
+        val params = IsReadyToPayParams.from(extras)
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "$params")
+        }
+        return if (checkParameters(params)) {
+            acceptingBinder
+        } else {
+            rejectingBinder
+        }
+    }
+
+    private fun checkParameters(params: IsReadyToPayParams): Boolean {
+        return params.methodNames.size == 1 &&
+                params.methodNames[0] == "https://sample-pay-e6bb3.firebaseapp.com"
     }
 }

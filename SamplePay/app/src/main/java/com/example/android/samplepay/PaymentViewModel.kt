@@ -17,32 +17,32 @@
 package com.example.android.samplepay
 
 import android.os.Bundle
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.map
-import com.example.android.samplepay.model.PaymentDetails
+import com.example.android.samplepay.model.PaymentAmount
+import com.example.android.samplepay.model.PaymentParams
+
+private const val TAG = "PaymentViewModel"
 
 class PaymentViewModel : ViewModel() {
 
-    private val _details = MutableLiveData<PaymentDetails>()
     private val _origin = MutableLiveData<String>()
     private val _merchantName = MutableLiveData<String>()
+    private val _total = MutableLiveData<PaymentAmount?>()
 
-    val totalAmount = _details.map { it?.total?.amount }
-    val origin: LiveData<String?>
-        get() = _origin
-    val merchantName: LiveData<String?>
-        get() = _merchantName
+    val total: LiveData<PaymentAmount?> = _total
+    val origin: LiveData<String?> = _origin
+    val merchantName: LiveData<String?> = _merchantName
 
     fun initialize(extras: Bundle) {
-        val detailsJson = extras.getString("details")
-        if (detailsJson == null) {
-
-        } else {
-            _details.value = PaymentDetails.parse(detailsJson)
+        val params = PaymentParams.from(extras)
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "$params")
         }
-        _origin.value = extras.getString("origin")
-        _merchantName.value = extras.getString("merchantName")
+        _total.value = params.total
+        _origin.value = params.topLevelOrigin
+        _merchantName.value = params.merchantName
     }
 }

@@ -48,7 +48,7 @@ class PaymentActivity : AppCompatActivity() {
             origin.isVisible = it != null
             origin.text = it
         }
-        viewModel.totalAmount.observe(this) { amount ->
+        viewModel.total.observe(this) { amount ->
             total.isVisible = amount != null
             if (amount != null) {
                 total.text = getString(

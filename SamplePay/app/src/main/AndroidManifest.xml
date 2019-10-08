@@ -51,10 +51,14 @@
                 android:resource="@array/method_names" />
         </activity>
 
+        <!--
+            The service should check the caller at runtime.
+        -->
         <service
             android:name=".SampleIsReadyToPayService"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="org.chromium.intent.action.IS_READY_TO_PAY" />
             </intent-filter>

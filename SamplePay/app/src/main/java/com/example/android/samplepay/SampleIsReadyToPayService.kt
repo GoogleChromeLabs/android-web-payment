@@ -18,6 +18,7 @@ package com.example.android.samplepay
 
 import android.app.Service
 import android.content.Intent
+import android.os.Binder
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
@@ -29,11 +30,22 @@ private const val TAG = "IsReadyToPayService"
 
 class SampleIsReadyToPayService : Service() {
 
-    private val acceptingBinder = object : IsReadyToPayService.Stub() {
+    private val binder = object : IsReadyToPayService.Stub() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
             try {
-                Log.d(TAG, "IsReadyToPay: true")
-                callback?.handleIsReadyToPay(true)
+                val callingPackage = packageManager.getNameForUid(Binder.getCallingUid())
+                if (callingPackage == "com.android.chrome" &&
+                    packageManager.hasSigningCertificates(
+                        callingPackage,
+                        setOf(parseFingerprint(getString(R.string.chrome_release_fingerprint)))
+                    )
+                ) {
+                    Log.d(TAG, "The caller is Chrome")
+                    callback?.handleIsReadyToPay(true)
+                } else {
+                    Log.d(TAG, "The caller is not Chrome")
+                    callback?.handleIsReadyToPay(false)
+                }
             } catch (e: RemoteException) {
                 // Ignore
             }
@@ -43,7 +55,8 @@ class SampleIsReadyToPayService : Service() {
     private val rejectingBinder = object : IsReadyToPayService.Stub() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
             try {
-                Log.d(TAG, "IsReadyToPay: false")
+                val callingPackage = packageManager.getNameForUid(Binder.getCallingUid())
+                Log.d(TAG, "Rejecting the call from $callingPackage")
                 callback?.handleIsReadyToPay(false)
             } catch (e: RemoteException) {
                 // Ignore
@@ -58,13 +71,14 @@ class SampleIsReadyToPayService : Service() {
             Log.d(TAG, "$params")
         }
         return if (checkParameters(params)) {
-            acceptingBinder
+            binder
         } else {
             rejectingBinder
         }
     }
 
     private fun checkParameters(params: IsReadyToPayParams): Boolean {
+        // Here, you can add more checks to `params` based on your criteria.
         return params.methodNames.size == 1 &&
                 params.methodNames[0] == "https://sample-pay-e6bb3.firebaseapp.com"
     }

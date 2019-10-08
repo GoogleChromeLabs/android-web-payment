@@ -37,6 +37,7 @@ class PaymentActivity : AppCompatActivity() {
 
         val merchantName: TextView = findViewById(R.id.merchant_name)
         val origin: TextView = findViewById(R.id.origin)
+        val error: TextView = findViewById(R.id.error)
         val total: TextView = findViewById(R.id.total)
         val pay: Button = findViewById(R.id.pay)
         pay.setOnClickListener { pay() }
@@ -48,12 +49,23 @@ class PaymentActivity : AppCompatActivity() {
             origin.isVisible = it != null
             origin.text = it
         }
-        viewModel.total.observe(this) { amount ->
-            total.isVisible = amount != null
-            if (amount != null) {
-                total.text = getString(
-                    R.string.total_format, amount.currency, amount.value
-                )
+        viewModel.error.observe(this) { e ->
+            if (e == 0) { // No error
+                error.isVisible = false
+                error.text = null
+                pay.isEnabled = true
+            } else {
+                error.isVisible = true
+                error.setText(e)
+                pay.isEnabled = false
+            }
+        }
+        viewModel.total.observe(this) { t ->
+            total.isVisible = t != null
+            total.text = if (t != null) {
+                getString(R.string.total_format, t.currency, t.value)
+            } else {
+                null
             }
         }
 
@@ -69,7 +81,7 @@ class PaymentActivity : AppCompatActivity() {
             return false
         }
         val extras = intent.extras ?: return false
-        viewModel.initialize(extras)
+        viewModel.initialize(extras, callingPackage)
         return true
     }
 
@@ -81,7 +93,7 @@ class PaymentActivity : AppCompatActivity() {
     private fun pay() {
         setResult(Activity.RESULT_OK, Intent().apply {
             putExtra("methodName", "https://sample-pay-e6bb3.firebaseapp.com")
-            putExtra("instrumentDetails", "{\"token\": \"put-some-data-here\"}")
+            putExtra("details", "{\"token\": \"put-some-data-here\"}")
         })
         finish()
     }

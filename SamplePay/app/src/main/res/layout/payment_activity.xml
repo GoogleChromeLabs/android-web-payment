@@ -63,6 +63,20 @@
             tools:text="https://example.com" />
 
         <TextView
+            android:id="@+id/error"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/spacing_medium"
+            android:textAppearance="?attr/textAppearanceHeadline5"
+            android:textColor="?attr/colorError"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/origin"
+            tools:text="There is an error in the parameters."
+            tools:visibility="visible" />
+
+        <TextView
             android:id="@+id/total"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -71,7 +85,7 @@
             android:textAppearance="?attr/textAppearanceHeadline5"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/origin"
+            app:layout_constraintTop_toBottomOf="@id/error"
             tools:text="Total: USD $25.00" />
 
         <TextView

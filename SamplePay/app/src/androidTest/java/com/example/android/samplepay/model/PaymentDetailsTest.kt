@@ -21,55 +21,12 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
-private const val SAMPLE_DETAILS = """
-{
-  "total": {
-    "label": "Total",
-    "amount": {
-      "currency": "USD",
-      "value": "25.00"
-    }
-  },
-  "displayItems": [
-    {
-      "label": "Merchandise 1",
-      "amount": {
-        "currency": "USD",
-        "value": "15.00"
-      }
-    },
-    {
-      "label": "Merchandise 2",
-      "amount": {
-        "currency": "USD",
-        "value": "10.00"
-      }
-    }
-  ]
-}
-"""
-
 private const val SAMPLE_TOTAL = """
 {"currency":"USD","value":"25.00"}
 """
 
 @RunWith(AndroidJUnit4::class)
 class PaymentDetailsTest {
-
-    @Test
-    fun parseDetails() {
-        val details = PaymentDetails.parse(SAMPLE_DETAILS)
-        assertThat(details.total.label).isEqualTo("Total")
-        assertThat(details.total.amount.currency).isEqualTo("USD")
-        assertThat(details.total.amount.value).isEqualTo("25.00")
-        assertThat(details.displayItems).hasSize(2)
-        assertThat(details.displayItems[0].label).isEqualTo("Merchandise 1")
-        assertThat(details.displayItems[0].amount.currency).isEqualTo("USD")
-        assertThat(details.displayItems[0].amount.value).isEqualTo("15.00")
-        assertThat(details.displayItems[1].label).isEqualTo("Merchandise 2")
-        assertThat(details.displayItems[1].amount.currency).isEqualTo("USD")
-        assertThat(details.displayItems[1].amount.value).isEqualTo("10.00")
-    }
 
     @Test
     fun parseTotal() {

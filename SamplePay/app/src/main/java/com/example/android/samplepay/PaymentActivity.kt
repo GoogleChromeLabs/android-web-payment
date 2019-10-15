@@ -16,7 +16,6 @@
 
 package com.example.android.samplepay
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -26,6 +25,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
 import androidx.lifecycle.observe
 
+/**
+ * This activity handles the PAY action from Chrome.
+ *
+ * It [returns][setResult] [#RESULT_OK] when the user clicks on the "Pay" button. The "Pay" button
+ * is disabled unless the calling app is Chrome.
+ */
 class PaymentActivity : AppCompatActivity() {
 
     private val viewModel: PaymentViewModel by viewModels()
@@ -35,12 +40,15 @@ class PaymentActivity : AppCompatActivity() {
         setContentView(R.layout.payment_activity)
         setSupportActionBar(findViewById(R.id.toolbar))
 
+        // View references.
         val merchantName: TextView = findViewById(R.id.merchant_name)
         val origin: TextView = findViewById(R.id.origin)
         val error: TextView = findViewById(R.id.error)
         val total: TextView = findViewById(R.id.total)
         val pay: Button = findViewById(R.id.pay)
         pay.setOnClickListener { pay() }
+
+        // Bind values from ViewModel to views.
         viewModel.merchantName.observe(this) { name ->
             merchantName.isVisible = name != null
             merchantName.text = name
@@ -86,12 +94,12 @@ class PaymentActivity : AppCompatActivity() {
     }
 
     private fun cancel() {
-        setResult(Activity.RESULT_CANCELED)
+        setResult(RESULT_CANCELED)
         finish()
     }
 
     private fun pay() {
-        setResult(Activity.RESULT_OK, Intent().apply {
+        setResult(RESULT_OK, Intent().apply {
             putExtra("methodName", "https://sample-pay-e6bb3.firebaseapp.com")
             putExtra("details", "{\"token\": \"put-some-data-here\"}")
         })

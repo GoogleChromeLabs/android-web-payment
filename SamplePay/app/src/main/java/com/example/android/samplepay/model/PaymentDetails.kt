@@ -19,51 +19,6 @@ package com.example.android.samplepay.model
 import org.json.JSONException
 import org.json.JSONObject
 
-data class PaymentDetails(
-    val total: PaymentItem,
-    val displayItems: List<PaymentItem>
-) {
-    companion object {
-        fun parse(json: String): PaymentDetails {
-            try {
-                val builder = Builder()
-                val obj = JSONObject(json)
-                builder.total = PaymentItem.parse(obj.getJSONObject("total"))
-                // We parse this "displayItems" field, but it is usually empty for privacy.
-                obj.optJSONArray("displayItems")?.let { displayItems ->
-                    for (i in 0 until displayItems.length()) {
-                        builder.displayItems.add(PaymentItem.parse(displayItems.getJSONObject(i)))
-                    }
-                }
-                return builder.build()
-            } catch (e: JSONException) {
-                throw RuntimeException("Cannot parse JSON", e)
-            }
-        }
-
-    }
-
-    internal class Builder {
-        var total: PaymentItem? = null
-        val displayItems = mutableListOf<PaymentItem>()
-        fun build() = PaymentDetails(total!!, displayItems)
-    }
-}
-
-data class PaymentItem(
-    val label: String,
-    val amount: PaymentAmount
-) {
-    companion object {
-        internal fun parse(obj: JSONObject): PaymentItem {
-            return PaymentItem(
-                obj.getString("label"),
-                PaymentAmount.parse(obj.getJSONObject("amount"))
-            )
-        }
-    }
-}
-
 data class PaymentAmount(
     val currency: String,
     val value: String
@@ -71,17 +26,15 @@ data class PaymentAmount(
     companion object {
         fun parse(json: String): PaymentAmount {
             try {
-                return parse(JSONObject(json))
+                val obj = JSONObject(json)
+                return PaymentAmount(
+                    obj.getString("currency"),
+                    obj.getString("value")
+                )
             } catch (e: JSONException) {
                 throw RuntimeException("Cannot parse JSON", e)
             }
         }
 
-        internal fun parse(obj: JSONObject): PaymentAmount {
-            return PaymentAmount(
-                obj.getString("currency"),
-                obj.getString("value")
-            )
-        }
     }
 }

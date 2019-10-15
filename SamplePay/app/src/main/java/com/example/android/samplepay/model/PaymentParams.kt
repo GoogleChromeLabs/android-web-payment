@@ -18,6 +18,9 @@ package com.example.android.samplepay.model
 
 import android.os.Bundle
 
+/**
+ * Represents all the parameters passed to the activity for the PAY action.
+ */
 data class PaymentParams(
     /**
      * The names of the methods being used. The elements are the keys in the [methodData]

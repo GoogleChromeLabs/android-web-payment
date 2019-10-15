@@ -28,6 +28,9 @@ import org.chromium.IsReadyToPayServiceCallback
 
 private const val TAG = "IsReadyToPayService"
 
+/**
+ * This service handles the IS_READY_TO_PAY action from Chrome.
+ */
 class SampleIsReadyToPayService : Service() {
 
     private val binder = object : IsReadyToPayService.Stub() {
@@ -52,6 +55,9 @@ class SampleIsReadyToPayService : Service() {
         }
     }
 
+    /**
+     * This binder simply returns false for any IS_READY_TO_PAY inquiry.
+     */
     private val rejectingBinder = object : IsReadyToPayService.Stub() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
             try {
@@ -70,14 +76,19 @@ class SampleIsReadyToPayService : Service() {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "$params")
         }
-        return if (checkParameters(params)) {
+        return if (areParametersValid(params)) {
             binder
         } else {
+            // Something was wrong in the parameters. We return the binder that always rejects the
+            // subsequent inquiry.
             rejectingBinder
         }
     }
 
-    private fun checkParameters(params: IsReadyToPayParams): Boolean {
+    /**
+     * @return Whether the provided parameters are valid.
+     */
+    private fun areParametersValid(params: IsReadyToPayParams): Boolean {
         // Here, you can add more checks to `params` based on your criteria.
         return params.methodNames.size == 1 &&
                 params.methodNames[0] == "https://sample-pay-e6bb3.firebaseapp.com"

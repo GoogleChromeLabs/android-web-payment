@@ -18,18 +18,12 @@ package com.example.android.samplepay
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
-import com.example.android.samplepay.ui.EdgeToEdge
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
-        val toolbar: Toolbar = findViewById(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        EdgeToEdge.setUpRoot(findViewById(R.id.root))
-        EdgeToEdge.setUpAppBar(findViewById(R.id.app_bar), toolbar)
-        EdgeToEdge.setUpScrollingContent(findViewById(R.id.content))
+        setSupportActionBar(findViewById(R.id.toolbar))
     }
 }

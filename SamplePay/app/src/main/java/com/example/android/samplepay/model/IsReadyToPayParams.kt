@@ -18,6 +18,9 @@ package com.example.android.samplepay.model
 
 import android.os.Bundle
 
+/**
+ * Represents all the parameters passed to the service for the IS_READY_TO_PAY action.
+ */
 data class IsReadyToPayParams(
     /**
      * The names of the methods being queried. The elements are the keys in [methodData] dictionary.

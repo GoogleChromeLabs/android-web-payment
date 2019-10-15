@@ -20,9 +20,6 @@
     <color name="primary_dark">#000051</color>
     <color name="secondary">#006064</color>
     <color name="secondary_light">#428e92</color>
-    <color name="secondary_dark">#00363a</color>
     <color name="primary_text">#ffffff</color>
     <color name="secondary_text">#ffffff</color>
-    <color name="dark_scrim">#66333333</color>
-    <color name="navigationBarColor">@color/dark_scrim</color>
 </resources>

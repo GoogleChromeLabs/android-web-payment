@@ -16,8 +16,9 @@ The project can be deployed to [Firebase Hosting](https://firebase.google.com/do
 1. Install [Firebase CLI](https://firebase.google.com/docs/cli#install_the_firebase_cli).
 2. Create a new Firebase project.
 3. Edit `SamplePay/.firebaserc` and change the project ID to yours.
-4. Edit `SamplePay/public/manifest.json` and change the domain nams to yours. Also, change the fingerprint SHA256 hash to yours.
+4. Edit `SamplePay/public/manifest.json` and change the domain nams to yours. Also, change the fingerprint SHA256 hash to your SamplePay's app.
 5. Edit `SamplePay/public/payment-manifest.json` and change the domain name to yours.
+6. Edit `SamplePay/firebase.json` and change the domain name to yours.
 6. Run `$ firebase deploy`.
 
 ## SamplePay (Android)
@@ -36,6 +37,6 @@ The project can be deployed to [Firebase Hosting](https://firebase.google.com/do
 
 1. Install [Firebase CLI](https://firebase.google.com/docs/cli#install_the_firebase_cli).
 2. Create a new Firebase project.
-3. Edit `SamplePay/.firebaserc` and change the project ID to yours.
-4. Edit `SamplePay/public/index.html` and change the `supportedMethods` to your domain.
+3. Edit `SampleMerchant/.firebaserc` and change the project ID to yours.
+4. Edit `SampleMerchant/public/index.html` and change the `supportedMethods` to your SamplePay's domain.
 5. Run `$ firebase deploy`.

@@ -41,25 +41,23 @@ fun parseFingerprint(fingerprint: String): ByteArray {
  * @param certificates The signing certificates to be matched.
  */
 fun PackageManager.hasSigningCertificates(
-    packageName: String, certificates: Set<ByteArray>
+    packageName: String,
+    certificates: Set<ByteArray>
 ): Boolean {
     return if (Build.VERSION.SDK_INT >= 28 && certificates.size == 1) {
         hasSigningCertificate(packageName, certificates.first(), PackageManager.CERT_INPUT_SHA256)
     } else {
-        @SuppressLint("PackageManagerGetSignatures") @Suppress("DEPRECATION") val packageInfo =
+        @SuppressLint("PackageManagerGetSignatures")
+        @Suppress("DEPRECATION")
+        val packageInfo =
             getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
         val sha256 = MessageDigest.getInstance("SHA-256")
 
-        @Suppress("DEPRECATION") val signatures =
-            packageInfo.signatures.map { sha256.digest(it.toByteArray()) }
-        // All the certificatecom.example.android.samplepays have to match in case the APK is signed with multiple keys.
-        signatures.size == certificates.size && signatures.all { s ->
-            certificates.any {
-                it.contentEquals(
-                    s
-                )
-            }
-        }
+        @Suppress("DEPRECATION")
+        val signatures = packageInfo.signatures.map { sha256.digest(it.toByteArray()) }
+        // All the certificates have to match in case the APK is signed with multiple keys.
+        signatures.size == certificates.size &&
+                signatures.all { s -> certificates.any { it.contentEquals(s) } }
     }
 }
 

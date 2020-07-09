@@ -91,5 +91,3 @@ class SampleIsReadyToPayService : Service() {
     }
 }
 
-// Todo :error cases
-// Todo: change payment method example

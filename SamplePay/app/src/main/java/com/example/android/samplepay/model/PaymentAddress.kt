@@ -18,13 +18,12 @@ package com.example.android.samplepay.model
 
 import android.os.Bundle
 
-data class PaymentAddress(val addressLines: Array<String>, val countryCode: String, val country: String,
-                          val city: String, val dependentLocality: String,
-                          val organization:String,
-                          val phone:String,
-                          val postalCode:String,val recipient:String, val region: String,val sortingCode:String
+data class PaymentAddress(
+    val addressLines: Array<String>, val countryCode: String, val country: String,
+    val city: String, val dependentLocality: String, val organization: String, val phone: String,
+    val postalCode: String, val recipient: String, val region: String, val sortingCode: String
 ) {
-    fun asBundle() : Bundle {
+    fun asBundle(): Bundle {
         val address = Bundle()
         address.putStringArray("addressLines", addressLines)
         address.putString("countryCode", countryCode)
@@ -34,15 +33,16 @@ data class PaymentAddress(val addressLines: Array<String>, val countryCode: Stri
         address.putString("organization", organization)
         address.putString("phone", phone)
         address.putString("postalCode", postalCode)
-        address.putString("recipient",recipient)
-        address.putString("region",region)
+        address.putString("recipient", recipient)
+        address.putString("region", region)
         address.putString("sortingCode", sortingCode)
         return address
     }
+
     override fun toString(): String {
         var address = "$recipient, $organization, "
-        addressLines.forEach { addressLine ->  address += ("$addressLine, ") }
-        var cityLine : String
+        addressLines.forEach { addressLine -> address += ("$addressLine, ") }
+        var cityLine: String
         if (!region.isNullOrEmpty()) cityLine = "$city, $region, $postalCode, $country\n"
         else cityLine = "$dependentLocality, $city, $postalCode, $country\n"
         address += cityLine

@@ -24,7 +24,7 @@ data class ShippingOption(
     var amountCurrency: String,
     var amountValue: String,
     val selected: Boolean
-){
+) {
     companion object {
         fun from(extras: Bundle): ShippingOption {
             return ShippingOption(

@@ -24,15 +24,15 @@ data class PaymentOptions(
     val requestPayerEmail: Boolean,
     val requestShipping: Boolean,
     val shippingType: String
-){
+) {
     companion object {
         fun from(extras: Bundle?): PaymentOptions {
             return PaymentOptions(
-                requestPayerName = extras?.getBoolean("requestPayerName", false)?: false,
-                requestPayerPhone = extras?.getBoolean("requestPayerPhone", false)?: false,
-                requestPayerEmail = extras?.getBoolean("requestPayerEmail", false)?: false,
-                requestShipping= extras?.getBoolean("requestShipping", false)?: false,
-                shippingType = extras?.getString("shippingType", "shipping")?: "shipping"
+                requestPayerName = extras?.getBoolean("requestPayerName", false) ?: false,
+                requestPayerPhone = extras?.getBoolean("requestPayerPhone", false) ?: false,
+                requestPayerEmail = extras?.getBoolean("requestPayerEmail", false) ?: false,
+                requestShipping = extras?.getBoolean("requestShipping", false) ?: false,
+                shippingType = extras?.getString("shippingType", "shipping") ?: "shipping"
             )
         }
     }

@@ -24,12 +24,12 @@ data class AddressErrors(
     val countryCode: String?,
     val city: String?,
     val dependentLocality: String?,
-    val organization:String?,
-    val phone:String?,
-    val postalCode:String?,
-    val recipient:String?,
+    val organization: String?,
+    val phone: String?,
+    val postalCode: String?,
+    val recipient: String?,
     val region: String?,
-    val sortingCode:String?
+    val sortingCode: String?
 ) {
     companion object {
         fun from(extras: Bundle): AddressErrors {
@@ -51,33 +51,33 @@ data class AddressErrors(
     override fun toString(): String {
         var error: String = ""
         if (!addressLines.isNullOrEmpty()) {
-            error = addressLines +"\n"
+            error = addressLines + "\n"
         }
         if (!countryCode.isNullOrEmpty()) {
-            error += countryCode +"\n"
+            error += countryCode + "\n"
         }
-        if(!city.isNullOrEmpty()) {
+        if (!city.isNullOrEmpty()) {
             error += city + "\n"
         }
         if (!dependentLocality.isNullOrEmpty()) {
-            error += dependentLocality +"\n"
+            error += dependentLocality + "\n"
         }
-        if(!organization.isNullOrEmpty()) {
+        if (!organization.isNullOrEmpty()) {
             error += organization + "\n"
         }
         if (!phone.isNullOrEmpty()) {
-            error = phone +"\n"
+            error = phone + "\n"
         }
         if (!postalCode.isNullOrEmpty()) {
-            error += postalCode +"\n"
+            error += postalCode + "\n"
         }
-        if(!recipient.isNullOrEmpty()) {
+        if (!recipient.isNullOrEmpty()) {
             error += recipient + "\n"
         }
         if (!region.isNullOrEmpty()) {
-            error += region +"\n"
+            error += region + "\n"
         }
-        if(!sortingCode.isNullOrEmpty()) {
+        if (!sortingCode.isNullOrEmpty()) {
             error += sortingCode + "\n"
         }
         return error

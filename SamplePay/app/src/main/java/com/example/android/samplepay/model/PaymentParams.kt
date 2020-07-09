@@ -70,7 +70,7 @@ data class PaymentParams(
      * The output of JSON.stringify(details.modifiers), where details.modifiers contain only
      * supportedMethods and total.
      */
-    var modifiers: String,
+    val modifiers: String,
 
     /**
      * The [PaymentRequest.id](https://w3c.github.io/payment-request/#id-attribute) field that
@@ -84,6 +84,9 @@ data class PaymentParams(
      */
     val paymentOptions: PaymentOptions,
 
+    /*
+     * Merchant specified shipping options; will be non-null whenever shipping is requested.
+     */
     var shippingOptions: List<ShippingOption>?
 ) {
     companion object {

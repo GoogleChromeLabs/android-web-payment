@@ -24,7 +24,6 @@ import androidx.lifecycle.MutableLiveData
 import com.example.android.samplepay.model.PaymentAmount
 import com.example.android.samplepay.model.PaymentParams
 
-
 private const val TAG = "PaymentViewModel"
 
 class PaymentViewModel(application: Application) : AndroidViewModel(application) {

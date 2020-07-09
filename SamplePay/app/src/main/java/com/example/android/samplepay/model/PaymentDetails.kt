@@ -21,14 +21,16 @@ import org.json.JSONException
 import org.json.JSONObject
 
 data class PaymentAmount(
-    val currency: String, val value: String
+    val currency: String,
+    val value: String
 ) {
     companion object {
         fun parse(json: String): PaymentAmount {
             try {
                 val obj = JSONObject(json)
                 return PaymentAmount(
-                    obj.getString("currency"), obj.getString("value")
+                    obj.getString("currency"),
+                    obj.getString("value")
                 )
             } catch (e: JSONException) {
                 throw RuntimeException("Cannot parse JSON", e)

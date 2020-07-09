@@ -3,12 +3,12 @@
   "short_name": "SamplePay",
   "icons": [
     {
-      "src": "https://sample-pay-e6bb3.firebaseapp.com/icon.png",
+      "src": "https://sample-pay-web-app.firebaseapp.com/icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://sample-pay-e6bb3.firebaseapp.com/icon-web.png",
+      "src": "https://sample-pay-web-app.firebaseapp.com/icon-web.png",
       "sizes": "512x512",
       "type": "image/png"
     }
@@ -26,7 +26,7 @@
       "fingerprints": [
         {
           "type": "sha256_cert",
-          "value": "4C:FC:14:C6:97:DE:66:4E:66:97:50:C0:24:CE:5F:27:00:92:EE:F3:7F:18:B3:DA:77:66:84:CD:9D:E9:D2:CB"
+          "value": "38:C3:9B:9A:72:A8:8C:70:E9:9A:D9:72:53:D1:87:CF:2E:8B:72:66:4D:EE:1B:26:BF:07:EA:11:BD:2D:05:1A"
         }
       ]
     }

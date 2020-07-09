@@ -36,4 +36,13 @@
         <item name="colorOnSecondary">@color/secondary_text</item>
     </style>
 
+    <style name="Theme.SamplePay.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="Theme.SamplePay.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="Theme.SamplePay.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 </resources>

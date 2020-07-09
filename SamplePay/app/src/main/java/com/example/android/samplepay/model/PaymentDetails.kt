@@ -16,25 +16,29 @@
 
 package com.example.android.samplepay.model
 
+import android.os.Bundle
 import org.json.JSONException
 import org.json.JSONObject
 
 data class PaymentAmount(
-    val currency: String,
-    val value: String
+    val currency: String, val value: String
 ) {
     companion object {
         fun parse(json: String): PaymentAmount {
             try {
                 val obj = JSONObject(json)
                 return PaymentAmount(
-                    obj.getString("currency"),
-                    obj.getString("value")
+                    obj.getString("currency"), obj.getString("value")
                 )
             } catch (e: JSONException) {
                 throw RuntimeException("Cannot parse JSON", e)
             }
         }
 
+        fun from(extras: Bundle): PaymentAmount {
+            return PaymentAmount(
+                currency = extras.getString("currency")!!, value = extras.getString("value")!!
+            )
+        }
     }
 }

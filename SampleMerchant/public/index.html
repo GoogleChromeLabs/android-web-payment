@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sample Merchant</title>
+<head>
+<meta name="generator" content=
+"HTML Tidy for HTML5 for Linux version 5.6.0">
+<meta charset="utf-8">
+<meta name="viewport" content=
+"width=device-width, initial-scale=1">
+<title>Sample Merchant</title>
 
-    <style media="screen">
+<style media="screen">
       body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
       #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
       #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
@@ -21,18 +24,17 @@
       #field { font-family: monospace; margin: 16px 0; }
       .error { color: red; margin: 8px 0; }
       .debug { color: green; margin: 8px 0; }
-    </style>
-  </head>
-  <body>
-    <div id="message">
-      <h2>Welcome</h2>
-      <h1>Sample Merchant</h1>
-      <p>This is a sample merchant page.</p>
-      <a id="pay">Pay</a>
-      <div id="field"></div>
-    </div>
-
-    <script>
+</style>
+</head>
+<body>
+<div id="message">
+<h2>Welcome</h2>
+<h1>Sample Merchant</h1>
+<p>This is a sample merchant page.</p>
+<a id="pay">Pay</a>
+<div id="field"></div>
+</div>
+<script>
       document.addEventListener('DOMContentLoaded', function () {
         const field = document.getElementById('field');
 
@@ -53,19 +55,12 @@
           }
         };
 
-        function buildPaymentRequest() {
-          if (!window.PaymentRequest) {
-            return null;
-          }
-          const supportedInstruments = [
-            { supportedMethods: 'https://sample-pay-e6bb3.firebaseapp.com' }
-          ];
-          const details = {
+        var details = {
             total: {
               label: 'Total',
               amount: {
                 currency: 'USD',
-                value: '25.00'
+                value: '30.00'
               }
             },
             displayItems: [
@@ -83,9 +78,56 @@
                   value: '10.00'
                 }
               }
+            ],
+            shippingOptions: [
+              {
+                id: "standard",
+                label: "🚛 Ground Shipping (2 days)",
+                amount: { currency: "USD", value: "5.00" },
+                selected: true,
+              },
+              {
+                id: "drone",
+                label: "🚀 Drone Express (2 hours)",
+                amount: { currency: "USD", value: "25.00" }
+              },
             ]
           };
-          const request = new PaymentRequest(supportedInstruments, details);
+
+        var destinationCountry = "US";
+        var promotionApplied = false;
+        const validPromotionCode = "123";
+
+        function buildPaymentRequest() {
+          if (!window.PaymentRequest) {
+            return null;
+          }
+          const supportedInstruments = [
+            { supportedMethods: 'https://sample-pay-web-app.firebaseapp.com' }
+          ];
+          
+          const options = {
+            requestPayerEmail: true,
+            requestPayerName: true,
+            requestPayerPhone: true,
+            requestShipping: true,
+          }
+          
+          // Reset details to default state.
+          destinationCountry = "US";
+          promotionApplied = false;
+          details.shippingOptions[0].selected = true;
+          details.shippingOptions[1].selected = false;
+          details.total.amount.currency = 'USD';
+          details.shippingOptions[0].amount.currency = 'USD';
+          details.shippingOptions[1].amount.currency = 'USD';
+          details.total.amount.value = adjustTotalPrice('25.00');
+          details.shippingOptions[0].amount.value = adjustShippingPrice('5.00');
+          details.shippingOptions[1].amount.value = adjustShippingPrice('25.00');
+          delete details.error;
+          delete details.paymentMethodErrors;
+        
+          const request = new PaymentRequest(supportedInstruments, details, options);
           if (request.canMakePayment) {
             request
               .canMakePayment()
@@ -106,10 +148,141 @@
                 log.e(e.message);
               })
           }
+          
+          request.addEventListener('shippingoptionchange', function(e) {
+            e.updateWith(new Promise(function(resolve) {
+              resolve(updateDetailsForOptionChange(details, request.shippingOption));
+            }));
+          });
+
+          request.addEventListener('shippingaddresschange', function(e) {
+            e.updateWith(new Promise(function(resolve) {
+                resolve(updateDetailsForAddressChange(details, request.shippingAddress));
+            }));
+          });
+
+          request.addEventListener('paymentmethodchange', function(e) {
+            e.updateWith(new Promise(function(resolve) {
+                resolve(updateDetailsForPaymentMethodChange(details, e));
+            }));
+          });
+
           return request;
         }
 
         let request = buildPaymentRequest();
+
+        /**
+         * Adjusts the total price based on the currently selected shipping option, 
+         * the destination country's currency, and applied promotion code.
+         * @param  {string} price - The original price tag.
+         * @return {string} The adjusted price tag.
+         */
+        function adjustTotalPrice(price) {
+          let adjustedPrice = parseFloat(price);
+          // Apply shipping cost.
+          if (details.shippingOptions[0].selected)
+            adjustedPrice += 5
+          else
+            adjustedPrice += 25
+
+          // Apply promotion discount.
+          if (promotionApplied)
+            adjustedPrice -= 5
+
+          if (destinationCountry === 'CA')
+            return (adjustedPrice * 1.2).toFixed(2)
+          else
+            return adjustedPrice;
+        }
+
+        /**
+         * Adjusts the total price based on the destination country's currency.
+         * @param  {string} price - The original price tag.
+         * @return {string} The adjusted price tag.
+         */
+        function adjustShippingPrice(price) {
+          if (destinationCountry === 'CA')
+            return (parseFloat(price) * 1.2).toFixed(2)
+          else
+            return price;
+        }
+
+        /**
+         * Updates the price based on the selected shipping option.
+         * @param {object} details - The current details to update.
+         * @param {string} shippingOption - The shipping option selected by user.
+         * @return {object} The updated details.
+         */
+        function updateDetailsForOptionChange(details, shippingOption) {
+          var selectedShippingOption;
+          var otherShippingOption;
+          if (shippingOption === 'standard') {
+            selectedShippingOption = details.shippingOptions[0];
+            otherShippingOption = details.shippingOptions[1];
+          } else {
+            selectedShippingOption = details.shippingOptions[1];
+            otherShippingOption = details.shippingOptions[0];
+          }
+          selectedShippingOption.selected = true;
+          otherShippingOption.selected = false;
+          details.total.amount.value = adjustTotalPrice('25.00');
+          return details;
+        }
+
+        /**
+         * Updates the details based on the selected address.
+         * @param {object} details - The current details to get updated.
+         * @param {PaymentAddress} addr - The user provided address.
+         * @return {object} The updated details.
+         */
+        function updateDetailsForAddressChange(details, addr) {
+          delete details.error;
+          if (addr.country === 'CA') {
+            details.total.amount.currency = 'CAD';
+            details.shippingOptions[0].amount.currency = 'CAD';
+            details.shippingOptions[1].amount.currency = 'CAD';
+          } else {
+            details.total.amount.currency = 'USD';
+            details.shippingOptions[0].amount.currency = 'USD';
+            details.shippingOptions[1].amount.currency = 'USD';
+          }
+          destinationCountry = addr.country;
+          if (destinationCountry != "US" && destinationCountry != "CA") {
+            // Disable shipping to this location by specifying an error message.
+            details.error = "Cannot ship to outside of United States or Canada."
+          }
+          
+          details.total.amount.value = adjustTotalPrice('25.00');
+          details.shippingOptions[0].amount.value = adjustShippingPrice('5.00');
+          details.shippingOptions[1].amount.value = adjustShippingPrice('25.00');
+          return details;
+        }
+
+        /**
+         * Updates the details based on the newly provided payment method and its details.
+         * @param {object} details - The current details to get updated.
+         * @param  {[type]} evt - The payment method change event.
+         * @return {object} The updated details.
+         */
+        function updateDetailsForPaymentMethodChange(details, evt) {
+          if (evt.methodDetails && evt.methodDetails.promotionCode) {
+            if (evt.methodDetails.promotionCode !== validPromotionCode) {
+              details.paymentMethodErrors = { "promotionCode": "Invalid promotion Code: " +
+                  evt.methodDetails.promotionCode };
+            } else {
+              if (promotionApplied) {
+                details.paymentMethodErrors = { "promotionCode":
+                    "Promotion Code 123 has been already applied!" };
+              } else {
+                promotionApplied = true;
+                delete details.paymentMethodErrors;
+              }
+            }
+          }
+          details.total.amount.value = adjustTotalPrice('25.00');
+          return details;
+        }
 
         function handlePaymentResponse(response) {
           window.setTimeout(function () {
@@ -146,6 +319,6 @@
           }
         });
       });
-    </script>
-  </body>
+</script>
+</body>
 </html>

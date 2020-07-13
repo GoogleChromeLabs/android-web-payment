@@ -33,59 +33,59 @@ private const val TAG = "PaymentDetailsUpdate"
 
 class PaymentDetailsUpdateActivity : Activity() {
     private var isBound: Boolean = false
-    private var mPromotionCode: String? = null
-    private var mSelectedOptionId: String? = null
-    private lateinit var mSelectedAddress: Bundle
-    private var mUpdatedPaymentDetails: Bundle? = null
+    private var promotionCode: String? = null
+    private var selectedOptionId: String? = null
+    private lateinit var selectedAddress: Bundle
+    private var updatedPaymentDetails: Bundle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mPromotionCode = intent.getStringExtra("promotionCode")
-        mSelectedOptionId = intent.getStringExtra("selectedOptionId")
-        mSelectedAddress = intent.getBundleExtra("selectedAddress") ?: Bundle()
+        promotionCode = intent.getStringExtra("promotionCode")
+        selectedOptionId = intent.getStringExtra("selectedOptionId")
+        selectedAddress = intent.getBundleExtra("selectedAddress") ?: Bundle()
         logIfDebug("Payment details update activity started")
         bind()
     }
 
-    private val mCallback: IPaymentDetailsUpdateServiceCallback =
+    private val callback: IPaymentDetailsUpdateServiceCallback =
         object : IPaymentDetailsUpdateServiceCallback.Stub() {
             override fun paymentDetailsNotUpdated() {
                 logIfDebug("Payment details did not change.")
                 unbind()
             }
 
-            override fun updateWith(updatedPaymentDetails: Bundle) {
-                mUpdatedPaymentDetails = updatedPaymentDetails
+            override fun updateWith(newPaymentDetails: Bundle) {
+                updatedPaymentDetails = newPaymentDetails
                 unbind()
             }
         }
 
-    private val mConnection = object : ServiceConnection {
+    private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             val paymentDetailsUpdateService = IPaymentDetailsUpdateService.Stub.asInterface(service)
             try {
                 when {
-                    mPromotionCode != null -> {
+                    promotionCode != null -> {
                         logIfDebug("changePaymentMethod called.")
                         val methodData = Bundle()
                         methodData.putString(
                             "methodName", "https://sample-pay-web-app.firebaseapp.com"
                         )
                         val details = JSONObject()
-                        details.put("promotionCode", mPromotionCode)
+                        details.put("promotionCode", promotionCode)
                         methodData.putString("details", details.toString())
-                        paymentDetailsUpdateService?.changePaymentMethod(methodData, mCallback)
+                        paymentDetailsUpdateService?.changePaymentMethod(methodData, callback)
                     }
-                    mSelectedOptionId != null -> {
+                    selectedOptionId != null -> {
                         logIfDebug("changeShippingOption called.")
                         paymentDetailsUpdateService?.changeShippingOption(
-                            mSelectedOptionId, mCallback
+                            selectedOptionId, callback
                         )
                     }
                     else -> {
                         logIfDebug("changeShippingAddress called.")
                         paymentDetailsUpdateService?.changeShippingAddress(
-                            mSelectedAddress, mCallback
+                            selectedAddress, callback
                         )
                     }
                 }
@@ -102,20 +102,21 @@ class PaymentDetailsUpdateActivity : Activity() {
     private fun bind() {
         val intent = Intent()
         intent.setClassName(
-            "org.chromium.chrome", "org.chromium.components.payments.PaymentDetailsUpdateService"
+            "org.chromium.chrome",
+            "org.chromium.components.payments.PaymentDetailsUpdateService"
         )
         intent.action = IPaymentDetailsUpdateService::class.java.name
-        isBound = bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
+        isBound = bindService(intent, connection, Context.BIND_AUTO_CREATE)
     }
 
     private fun unbind() {
         if (isBound) {
-            unbindService(mConnection)
+            unbindService(connection)
             isBound = false
         }
         setResult(RESULT_OK, Intent().apply {
-            if (mUpdatedPaymentDetails != null) {
-                putExtra("updatedPaymentParams", mUpdatedPaymentDetails)
+            if (updatedPaymentDetails != null) {
+                putExtra("updatedPaymentParams", updatedPaymentDetails)
             }
         })
         finish()

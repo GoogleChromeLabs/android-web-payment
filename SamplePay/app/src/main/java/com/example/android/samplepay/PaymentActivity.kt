@@ -42,16 +42,16 @@ private const val TAG = "PaymentActivity"
  * is disabled unless the calling app is Chrome.
  */
 class PaymentActivity : AppCompatActivity() {
-    private lateinit var mErrorMessage: String
-    private var mPromotionError: String = ""
+    private lateinit var errorMessage: String
+    private var promotionErrorMessage: String = ""
     private lateinit var mParams: PaymentParams
-    private lateinit var mShippingOptions: RadioGroup
-    private lateinit var mShippingAddresses: RadioGroup
+    private lateinit var shippingOptions: RadioGroup
+    private lateinit var shippingAddresses: RadioGroup
     private val viewModel: PaymentViewModel by viewModels()
     private lateinit var payButton: Button
     private lateinit var promotionButton: Button
-    private var mAddresses: HashMap<Int, PaymentAddress> = HashMap()
-    private lateinit var mSelectedShippingOptionId: String
+    private var addresses: HashMap<Int, PaymentAddress> = HashMap()
+    private lateinit var selectedShippingOptionId: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,7 +115,7 @@ class PaymentActivity : AppCompatActivity() {
             }
         }
         viewModel.shipping.observe(this) {
-            mShippingOptions.isVisible = it
+            shippingOptions.isVisible = it
         }
 
         viewModel.payerName.observe(this) {
@@ -148,12 +148,12 @@ class PaymentActivity : AppCompatActivity() {
             setShippingOptionChangeListener()
             createShippingAddresses()
         }
-        mErrorMessage = if (packageManager.authorizeCaller(callingPackage, application)) {
+        errorMessage = if (packageManager.authorizeCaller(callingPackage, application)) {
             ""
         } else {
             getString(R.string.error_caller_not_chrome)
         }
-        viewModel.initialize(mParams, mErrorMessage, mPromotionError)
+        viewModel.initialize(mParams, errorMessage, promotionErrorMessage)
         return true
     }
 
@@ -162,31 +162,31 @@ class PaymentActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.option_title).text =
             "${mParams.paymentOptions.shippingType.capitalize()} Options:"
 
-        mErrorMessage = ""
-        mShippingOptions = findViewById(R.id.shipping_options)
-        mShippingOptions.removeAllViews()
+        errorMessage = ""
+        shippingOptions = findViewById(R.id.shipping_options)
+        shippingOptions.removeAllViews()
         mParams.shippingOptions?.forEach {
             val radioButton = RadioButton(this)
             val label = "${it.label}, ${it.amountCurrency} ${it.amountValue}"
             radioButton.text = label
             radioButton.tag = it.id
             radioButton.id = View.generateViewId()
-            mShippingOptions.addView(radioButton)
+            shippingOptions.addView(radioButton)
             if (it.selected) {
-                mShippingOptions.check(radioButton.id)
-                mSelectedShippingOptionId = it.id
+                shippingOptions.check(radioButton.id)
+                selectedShippingOptionId = it.id
             }
         }
     }
 
     private fun setShippingOptionChangeListener() {
-        mShippingOptions.setOnCheckedChangeListener { group, checkedId ->
+        shippingOptions.setOnCheckedChangeListener { group, checkedId ->
             val selected: RadioButton = group.findViewById(checkedId)
-            if (selected.tag.toString() != mSelectedShippingOptionId) {
-                mSelectedShippingOptionId = selected.tag.toString()
+            if (selected.tag.toString() != selectedShippingOptionId) {
+                selectedShippingOptionId = selected.tag.toString()
                 val shippingOptionChangeIntent =
                     Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)
-                shippingOptionChangeIntent.putExtra("selectedOptionId", mSelectedShippingOptionId)
+                shippingOptionChangeIntent.putExtra("selectedOptionId", selectedShippingOptionId)
                 payButton.isEnabled = false
                 startActivityForResult(
                     shippingOptionChangeIntent, UPDATE_DETAILS_ACTIVITY_REQUEST_CODE
@@ -200,7 +200,7 @@ class PaymentActivity : AppCompatActivity() {
             "${mParams.paymentOptions.shippingType.capitalize()} Address:"
 
         // Todo: allow the user to add/edit address
-        mAddresses[R.id.canada_address] = PaymentAddress(
+        addresses[R.id.canada_address] = PaymentAddress(
             arrayOf("111 Richmond st. West #12"),
             "CA",
             "Canada",
@@ -214,9 +214,9 @@ class PaymentActivity : AppCompatActivity() {
             ""
         )
         (findViewById<RadioButton>(R.id.canada_address)).text =
-            mAddresses[R.id.canada_address].toString()
+            addresses[R.id.canada_address].toString()
 
-        mAddresses[R.id.us_address] = PaymentAddress(
+        addresses[R.id.us_address] = PaymentAddress(
             arrayOf("1875 Explorer St #1000"),
             "US",
             "United States",
@@ -229,9 +229,9 @@ class PaymentActivity : AppCompatActivity() {
             "Virginia",
             ""
         )
-        (findViewById<RadioButton>(R.id.us_address)).text = mAddresses[R.id.us_address].toString()
+        (findViewById<RadioButton>(R.id.us_address)).text = addresses[R.id.us_address].toString()
 
-        mAddresses[R.id.uk_address] = PaymentAddress(
+        addresses[R.id.uk_address] = PaymentAddress(
             arrayOf("1-13 St Giles High St"),
             "UK",
             "United Kingdom",
@@ -244,14 +244,14 @@ class PaymentActivity : AppCompatActivity() {
             "",
             ""
         )
-        (findViewById<RadioButton>(R.id.uk_address)).text = mAddresses[R.id.uk_address].toString()
+        (findViewById<RadioButton>(R.id.uk_address)).text = addresses[R.id.uk_address].toString()
 
-        mShippingAddresses = findViewById(R.id.shipping_addresses)
-        mShippingAddresses.setOnCheckedChangeListener { _, checkedId ->
+        shippingAddresses = findViewById(R.id.shipping_addresses)
+        shippingAddresses.setOnCheckedChangeListener { _, checkedId ->
             val shippingAddressChangeIntent =
                 Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)
             shippingAddressChangeIntent.putExtra(
-                "selectedAddress", mAddresses[checkedId]?.asBundle()
+                "selectedAddress", addresses[checkedId]?.asBundle()
             )
             payButton.isEnabled = false
             startActivityForResult(
@@ -281,25 +281,25 @@ class PaymentActivity : AppCompatActivity() {
                     }
 
                     if (updatedParams?.error != null) {
-                        mErrorMessage = updatedParams.error + "\n"
+                        errorMessage = updatedParams.error + "\n"
                         logIfDebug("New error:\t" + updatedParams.error)
                     }
 
                     if (updatedParams?.addressErrors != null) {
-                        mErrorMessage += updatedParams.addressErrors.toString()
+                        errorMessage += updatedParams.addressErrors.toString()
                         logIfDebug(
                             "New address errors:\t" + updatedParams.addressErrors.toString()
                         )
                     }
 
                     if (updatedParams?.stringifiedPaymentMethodErrors != null) {
-                        mPromotionError = updatedParams.stringifiedPaymentMethodErrors
+                        promotionErrorMessage = updatedParams.stringifiedPaymentMethodErrors
                         logIfDebug(
                             "New payment method error:\t" + updatedParams.stringifiedPaymentMethodErrors
                         )
                     }
 
-                    viewModel.initialize(mParams, mErrorMessage, mPromotionError)
+                    viewModel.initialize(mParams, errorMessage, promotionErrorMessage)
                 }
             }
         }
@@ -340,14 +340,14 @@ class PaymentActivity : AppCompatActivity() {
         }
         if (mParams.paymentOptions.requestShipping) {
             putExtra(
-                "shippingAddress", mAddresses[mShippingAddresses.checkedRadioButtonId]?.asBundle()
+                "shippingAddress", addresses[shippingAddresses.checkedRadioButtonId]?.asBundle()
             )
-            putExtra("shippingOptionId", mSelectedShippingOptionId)
+            putExtra("shippingOptionId", selectedShippingOptionId)
         }
     }
 
     private fun applyPromotion() {
-        mPromotionError = ""
+        promotionErrorMessage = ""
         val promotionCode = findViewById<EditText>(R.id.promotion_code).text.toString()
         val paymentMethodChangeIntent =
             Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)

@@ -39,7 +39,8 @@ data class PaymentAmount(
 
         fun from(extras: Bundle): PaymentAmount {
             return PaymentAmount(
-                currency = extras.getString("currency")!!, value = extras.getString("value")!!
+                currency = extras.getString("currency")!!,
+                value = extras.getString("value")!!
             )
         }
     }

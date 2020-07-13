@@ -43,8 +43,10 @@ data class PaymentAddress(
         var address = "$recipient, $organization, "
         addressLines.forEach { addressLine -> address += ("$addressLine, ") }
         var cityLine: String
-        if (!region.isNullOrEmpty()) cityLine = "$city, $region, $postalCode, $country\n"
-        else cityLine = "$dependentLocality, $city, $postalCode, $country\n"
+        if (!region.isNullOrEmpty())
+            cityLine = "$city, $region, $postalCode, $country\n"
+        else
+            cityLine = "$dependentLocality, $city, $postalCode, $country\n"
         address += cityLine
         return address
     }

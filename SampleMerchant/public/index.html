@@ -55,7 +55,7 @@
           }
         };
 
-        var details = {
+        const details = {
             total: {
               label: 'Total',
               amount: {
@@ -81,22 +81,22 @@
             ],
             shippingOptions: [
               {
-                id: "standard",
-                label: "🚛 Ground Shipping (2 days)",
-                amount: { currency: "USD", value: "5.00" },
+                id: 'standard',
+                label: '🚛 Ground Shipping (2 days)',
+                amount: { currency: 'USD', value: '5.00' },
                 selected: true,
               },
               {
-                id: "drone",
-                label: "🚀 Drone Express (2 hours)",
-                amount: { currency: "USD", value: "25.00" }
+                id: 'drone',
+                label: '🚀 Drone Express (2 hours)',
+                amount: { currency: 'USD', value: '25.00' }
               },
             ]
           };
 
-        var destinationCountry = "US";
-        var promotionApplied = false;
-        const validPromotionCode = "123";
+        let destinationCountry = 'US';
+        let promotionApplied = false;
+        const validPromotionCode = '123';
 
         function buildPaymentRequest() {
           if (!window.PaymentRequest) {
@@ -114,7 +114,7 @@
           }
           
           // Reset details to default state.
-          destinationCountry = "US";
+          destinationCountry = 'US';
           promotionApplied = false;
           details.shippingOptions[0].selected = true;
           details.shippingOptions[1].selected = false;
@@ -150,21 +150,18 @@
           }
           
           request.addEventListener('shippingoptionchange', function(e) {
-            e.updateWith(new Promise(function(resolve) {
-              resolve(updateDetailsForOptionChange(details, request.shippingOption));
-            }));
+            e.updateWith(Promise.resolve(
+                updateDetailsForOptionChange(details, request.shippingOption)));
           });
 
           request.addEventListener('shippingaddresschange', function(e) {
-            e.updateWith(new Promise(function(resolve) {
-                resolve(updateDetailsForAddressChange(details, request.shippingAddress));
-            }));
+            e.updateWith(Promise.resolve(
+                updateDetailsForAddressChange(details, request.shippingAddress)));
           });
 
           request.addEventListener('paymentmethodchange', function(e) {
-            e.updateWith(new Promise(function(resolve) {
-                resolve(updateDetailsForPaymentMethodChange(details, e));
-            }));
+            e.updateWith(Promise.resolve(
+                updateDetailsForPaymentMethodChange(details, e)));
           });
 
           return request;
@@ -193,7 +190,7 @@
           if (destinationCountry === 'CA')
             return (adjustedPrice * 1.2).toFixed(2)
           else
-            return adjustedPrice;
+            return adjustedPrice.toFixed(2);
         }
 
         /**
@@ -215,8 +212,8 @@
          * @return {object} The updated details.
          */
         function updateDetailsForOptionChange(details, shippingOption) {
-          var selectedShippingOption;
-          var otherShippingOption;
+          let selectedShippingOption;
+          let otherShippingOption;
           if (shippingOption === 'standard') {
             selectedShippingOption = details.shippingOptions[0];
             otherShippingOption = details.shippingOptions[1];
@@ -248,9 +245,9 @@
             details.shippingOptions[1].amount.currency = 'USD';
           }
           destinationCountry = addr.country;
-          if (destinationCountry != "US" && destinationCountry != "CA") {
+          if (destinationCountry != 'US' && destinationCountry != 'CA') {
             // Disable shipping to this location by specifying an error message.
-            details.error = "Cannot ship to outside of United States or Canada."
+            details.error = 'Cannot ship to outside of United States or Canada.'
           }
           
           details.total.amount.value = adjustTotalPrice('25.00');
@@ -268,12 +265,12 @@
         function updateDetailsForPaymentMethodChange(details, evt) {
           if (evt.methodDetails && evt.methodDetails.promotionCode) {
             if (evt.methodDetails.promotionCode !== validPromotionCode) {
-              details.paymentMethodErrors = { "promotionCode": "Invalid promotion Code: " +
+              details.paymentMethodErrors = { 'promotionCode': 'Invalid promotion Code: ' +
                   evt.methodDetails.promotionCode };
             } else {
               if (promotionApplied) {
-                details.paymentMethodErrors = { "promotionCode":
-                    "Promotion Code 123 has been already applied!" };
+                details.paymentMethodErrors = { 'promotionCode':
+                    'Promotion Code 123 has been already applied!' };
               } else {
                 promotionApplied = true;
                 delete details.paymentMethodErrors;

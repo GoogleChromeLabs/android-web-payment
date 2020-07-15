@@ -44,7 +44,7 @@ private const val TAG = "PaymentActivity"
 class PaymentActivity : AppCompatActivity() {
     private lateinit var errorMessage: String
     private var promotionErrorMessage: String = ""
-    private lateinit var mParams: PaymentParams
+    private lateinit var paymentParams: PaymentParams
     private lateinit var shippingOptions: RadioGroup
     private lateinit var shippingAddresses: RadioGroup
     private val viewModel: PaymentViewModel by viewModels()
@@ -142,8 +142,8 @@ class PaymentActivity : AppCompatActivity() {
             return false
         }
         val extras = intent.extras ?: return false
-        mParams = PaymentParams.from(extras)
-        if (mParams.paymentOptions.requestShipping) {
+        paymentParams = PaymentParams.from(extras)
+        if (paymentParams.paymentOptions.requestShipping) {
             createShippingOptions()
             setShippingOptionChangeListener()
             createShippingAddresses()
@@ -153,19 +153,19 @@ class PaymentActivity : AppCompatActivity() {
         } else {
             getString(R.string.error_caller_not_chrome)
         }
-        viewModel.initialize(mParams, errorMessage, promotionErrorMessage)
+        viewModel.initialize(paymentParams, errorMessage, promotionErrorMessage)
         return true
     }
 
     @SuppressLint("NewApi")
     private fun createShippingOptions() {
         findViewById<TextView>(R.id.option_title).text =
-            "${mParams.paymentOptions.shippingType.capitalize()} Options:"
+            "${paymentParams.paymentOptions.shippingType.capitalize()} Options:"
 
         errorMessage = ""
         shippingOptions = findViewById(R.id.shipping_options)
         shippingOptions.removeAllViews()
-        mParams.shippingOptions?.forEach {
+        paymentParams.shippingOptions?.forEach {
             val radioButton = RadioButton(this)
             val label = "${it.label}, ${it.amountCurrency} ${it.amountValue}"
             radioButton.text = label
@@ -197,7 +197,7 @@ class PaymentActivity : AppCompatActivity() {
 
     private fun createShippingAddresses() {
         findViewById<TextView>(R.id.address_title).text =
-            "${mParams.paymentOptions.shippingType.capitalize()} Address:"
+            "${paymentParams.paymentOptions.shippingType.capitalize()} Address:"
 
         // Todo: allow the user to add/edit address
         addresses[R.id.canada_address] = PaymentAddress(
@@ -270,14 +270,14 @@ class PaymentActivity : AppCompatActivity() {
                     }
 
                     if (updatedParams?.shippingOptions != null) {
-                        mParams.shippingOptions = updatedParams.shippingOptions
+                        paymentParams.shippingOptions = updatedParams.shippingOptions
                         createShippingOptions()
-                        logIfDebug("New shipping options:\t" + "${mParams.shippingOptions}")
+                        logIfDebug("New shipping options:\t" + "${paymentParams.shippingOptions}")
                     }
 
                     if (updatedParams?.total != null) {
-                        mParams.total = updatedParams.total
-                        logIfDebug("New total:\t" + "${mParams.total}")
+                        paymentParams.total = updatedParams.total
+                        logIfDebug("New total:\t" + "${paymentParams.total}")
                     }
 
                     if (updatedParams?.error != null) {
@@ -299,7 +299,7 @@ class PaymentActivity : AppCompatActivity() {
                         )
                     }
 
-                    viewModel.initialize(mParams, errorMessage, promotionErrorMessage)
+                    viewModel.initialize(paymentParams, errorMessage, promotionErrorMessage)
                 }
             }
         }
@@ -323,22 +323,22 @@ class PaymentActivity : AppCompatActivity() {
     }
 
     private fun Intent.populateRequestedPaymentOptions() {
-        if (mParams.paymentOptions.requestPayerName) {
+        if (paymentParams.paymentOptions.requestPayerName) {
             val payerNameView = findViewById<EditText>(R.id.payer_name)
             val payerName: String = payerNameView.text.toString()
             putExtra("payerName", payerName)
         }
-        if (mParams.paymentOptions.requestPayerPhone) {
+        if (paymentParams.paymentOptions.requestPayerPhone) {
             val payerPhoneView = findViewById<EditText>(R.id.payer_phone)
             val payerPhone: String = payerPhoneView.text.toString()
             putExtra("payerPhone", payerPhone)
         }
-        if (mParams.paymentOptions.requestPayerEmail) {
+        if (paymentParams.paymentOptions.requestPayerEmail) {
             val payerEmailView = findViewById<EditText>(R.id.payer_email)
             val payerEmail: String = payerEmailView.text.toString()
             putExtra("payerEmail", payerEmail)
         }
-        if (mParams.paymentOptions.requestShipping) {
+        if (paymentParams.paymentOptions.requestShipping) {
             putExtra(
                 "shippingAddress", addresses[shippingAddresses.checkedRadioButtonId]?.asBundle()
             )

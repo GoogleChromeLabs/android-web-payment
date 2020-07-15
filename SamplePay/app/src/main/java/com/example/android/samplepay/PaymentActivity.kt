@@ -42,16 +42,16 @@ private const val TAG = "PaymentActivity"
  * is disabled unless the calling app is Chrome.
  */
 class PaymentActivity : AppCompatActivity() {
-    private lateinit var errorMessage: String
-    private var promotionErrorMessage: String = ""
     private lateinit var paymentParams: PaymentParams
     private lateinit var shippingOptions: RadioGroup
     private lateinit var shippingAddresses: RadioGroup
-    private val viewModel: PaymentViewModel by viewModels()
     private lateinit var payButton: Button
     private lateinit var promotionButton: Button
-    private var addresses: HashMap<Int, PaymentAddress> = HashMap()
     private lateinit var selectedShippingOptionId: String
+    private val viewModel: PaymentViewModel by viewModels()
+    private var errorMessage: String = ""
+    private var promotionErrorMessage: String = ""
+    private var addresses: HashMap<Int, PaymentAddress> = HashMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

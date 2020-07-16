@@ -17,4 +17,5 @@
 <resources>
     <dimen name="toolbar_elevation">4dp</dimen>
     <dimen name="spacing_medium">16dp</dimen>
+    <dimen name="spacing_small">8dp</dimen>
 </resources>

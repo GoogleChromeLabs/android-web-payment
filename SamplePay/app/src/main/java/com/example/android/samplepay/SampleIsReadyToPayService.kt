@@ -18,6 +18,7 @@ package com.example.android.samplepay
 
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.IBinder
 import android.os.RemoteException
@@ -36,13 +37,8 @@ class SampleIsReadyToPayService : Service() {
     private val binder = object : IsReadyToPayService.Stub() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
             try {
-                val callingPackage = packageManager.getNameForUid(Binder.getCallingUid())
-                if (callingPackage == "com.android.chrome" &&
-                    packageManager.hasSigningCertificates(
-                        callingPackage,
-                        setOf(parseFingerprint(getString(R.string.chrome_release_fingerprint)))
-                    )
-                ) {
+                val callingPackage: String? = packageManager.getNameForUid(Binder.getCallingUid())
+                if (packageManager.authorizeCaller(callingPackage, application)) {
                     Log.d(TAG, "The caller is Chrome")
                     callback?.handleIsReadyToPay(true)
                 } else {
@@ -91,6 +87,7 @@ class SampleIsReadyToPayService : Service() {
     private fun areParametersValid(params: IsReadyToPayParams): Boolean {
         // Here, you can add more checks to `params` based on your criteria.
         return params.methodNames.size == 1 &&
-                params.methodNames[0] == "https://sample-pay-e6bb3.firebaseapp.com"
+                params.methodNames[0] == "https://sample-pay-web-app.firebaseapp.com"
     }
 }
+

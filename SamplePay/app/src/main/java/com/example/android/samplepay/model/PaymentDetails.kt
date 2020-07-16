@@ -16,6 +16,7 @@
 
 package com.example.android.samplepay.model
 
+import android.os.Bundle
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -36,5 +37,11 @@ data class PaymentAmount(
             }
         }
 
+        fun from(extras: Bundle): PaymentAmount {
+            return PaymentAmount(
+                currency = extras.getString("currency")!!,
+                value = extras.getString("value")!!
+            )
+        }
     }
 }

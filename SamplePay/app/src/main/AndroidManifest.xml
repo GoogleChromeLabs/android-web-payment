@@ -29,6 +29,12 @@
         android:theme="@style/Theme.SamplePay"
         tools:ignore="GoogleAppIndexingWarning">
 
+        <activity
+            android:name=".PaymentDetailsUpdateActivity"
+            android:label="@string/title_activity_payment_details_update"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+        </activity>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,10 +51,13 @@
 
             <meta-data
                 android:name="org.chromium.default_payment_method_name"
-                android:value="https://sample-pay-e6bb3.firebaseapp.com" />
+                android:value="https://sample-pay-web-app.firebaseapp.com" />
             <meta-data
                 android:name="org.chromium.payment_method_names"
                 android:resource="@array/method_names" />
+            <meta-data
+                android:name="org.chromium.payment_supported_delegations"
+                android:resource="@array/supported_delegations" />
         </activity>
 
         <!--

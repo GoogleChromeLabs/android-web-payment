@@ -64,7 +64,7 @@ data class PaymentParams(
     /**
      * The total amount of the checkout.
      */
-    val total: PaymentAmount?,
+    var total: PaymentAmount?,
 
     /**
      * The output of JSON.stringify(details.modifiers), where details.modifiers contain only
@@ -77,7 +77,17 @@ data class PaymentParams(
      * “push-payment” apps should associate with transaction state. Merchant websites will use
      * this field to query the “push-payment” apps for the state of transaction out of band.
      */
-    val paymentRequestId: String
+    val paymentRequestId: String,
+
+    /*
+     * The additional information requested by the merchant.
+     */
+    val paymentOptions: PaymentOptions,
+
+    /*
+     * Merchant specified shipping options; will be non-null whenever shipping is requested.
+     */
+    var shippingOptions: List<ShippingOption>?
 ) {
     companion object {
         fun from(extras: Bundle): PaymentParams {
@@ -90,7 +100,9 @@ data class PaymentParams(
                 paymentRequestOrigin = extras.getString("paymentRequestOrigin", ""),
                 total = extras.getPaymentAmount("total"),
                 modifiers = extras.getString("modifiers", "[]"),
-                paymentRequestId = extras.getString("paymentRequestId", "")
+                paymentRequestId = extras.getString("paymentRequestId", ""),
+                paymentOptions = PaymentOptions.from(extras.getBundle("paymentOptions")),
+                shippingOptions = extras.getShippingOptions("shippingOptions")
             )
         }
     }

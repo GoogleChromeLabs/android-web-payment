@@ -17,8 +17,6 @@
 package com.example.android.samplepay
 
 import android.app.Application
-import android.content.Context
-import android.os.Bundle
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -32,32 +30,36 @@ class PaymentViewModel(application: Application) : AndroidViewModel(application)
 
     private val _origin = MutableLiveData<String>()
     private val _merchantName = MutableLiveData<String>()
-    private val _error = MutableLiveData<Int>()
+    private val _error = MutableLiveData<String>()
+    private val _promotionError = MutableLiveData<String>()
     private val _total = MutableLiveData<PaymentAmount?>()
+    private val _payerName = MutableLiveData<Boolean>()
+    private val _payerPhone = MutableLiveData<Boolean>()
+    private val _payerEmail = MutableLiveData<Boolean>()
+    private val _shipping = MutableLiveData<Boolean>()
 
     val origin: LiveData<String?> = _origin
     val merchantName: LiveData<String?> = _merchantName
-    val error: LiveData<Int> = _error
+    val error: LiveData<String> = _error
+    val promotionError: LiveData<String> = _promotionError
     val total: LiveData<PaymentAmount?> = _total
+    var payerName: MutableLiveData<Boolean> = _payerName
+    var payerPhone: MutableLiveData<Boolean> = _payerPhone
+    var payerEmail: MutableLiveData<Boolean> = _payerEmail
+    var shipping: MutableLiveData<Boolean> = _shipping
 
-    fun initialize(extras: Bundle, callingPackage: String?) {
-        val params = PaymentParams.from(extras)
+    fun initialize(params: PaymentParams, error: String?, promotionError: String) {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "$params")
         }
-        val context: Context = getApplication()
-        _error.value = if (callingPackage != null &&
-            context.packageManager.hasSigningCertificates(
-                callingPackage,
-                setOf(parseFingerprint(context.getString(R.string.chrome_release_fingerprint)))
-            )
-        ) {
-            0
-        } else {
-            R.string.error_caller_not_chrome
-        }
+        _error.value = error
+        _promotionError.value = promotionError
         _total.value = params.total
         _origin.value = params.topLevelOrigin
         _merchantName.value = params.merchantName
+        _payerName.value = params.paymentOptions.requestPayerName
+        _payerPhone.value = params.paymentOptions.requestPayerPhone
+        _payerEmail.value = params.paymentOptions.requestPayerEmail
+        _shipping.value = params.paymentOptions.requestShipping
     }
 }

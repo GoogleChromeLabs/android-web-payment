@@ -39,6 +39,12 @@ internal fun Bundle.getPaymentAmount(key: String): PaymentAmount? {
     }
 }
 
+internal fun Bundle.getShippingOptions(key: String): List<ShippingOption>? {
+    return getParcelableArray(key)?.mapNotNull {
+        ShippingOption.from(it as Bundle)
+    }
+}
+
 internal fun Bundle.getMethodData(key: String): Map<String, String> {
     val b = getBundle(key) ?: return emptyMap()
     return b.keySet().map { it to b.getString(it, "[]") }.toMap()

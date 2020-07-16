@@ -17,6 +17,7 @@
 package com.example.android.samplepay
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import java.security.MessageDigest
@@ -48,12 +49,28 @@ fun PackageManager.hasSigningCertificates(
     } else {
         @SuppressLint("PackageManagerGetSignatures")
         @Suppress("DEPRECATION")
-        val packageInfo = getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
+        val packageInfo =
+            getPackageInfo(packageName, PackageManager.GET_SIGNATURES)
         val sha256 = MessageDigest.getInstance("SHA-256")
+
         @Suppress("DEPRECATION")
         val signatures = packageInfo.signatures.map { sha256.digest(it.toByteArray()) }
         // All the certificates have to match in case the APK is signed with multiple keys.
         signatures.size == certificates.size &&
                 signatures.all { s -> certificates.any { it.contentEquals(s) } }
     }
+}
+
+fun PackageManager.authorizeCaller(packageName: String?, context: Context): Boolean {
+    return (packageName == "com.android.chrome" && hasSigningCertificates(
+        packageName, setOf(parseFingerprint(context.getString(R.string.chrome_stable_fingerprint)))
+    )) || (packageName == "com.chrome.beta" && hasSigningCertificates(
+        packageName, setOf(parseFingerprint(context.getString(R.string.chrome_beta_fingerprint)))
+    )) || (packageName == "com.chrome.dev" && hasSigningCertificates(
+        packageName, setOf(parseFingerprint(context.getString(R.string.chrome_dev_fingerprint)))
+    )) || (packageName == "com.chrome.canary" && hasSigningCertificates(
+        packageName, setOf(parseFingerprint(context.getString(R.string.chrome_canary_fingerprint)))
+    )) || (packageName == "org.chromium.chrome" && hasSigningCertificates(
+        packageName, setOf(parseFingerprint(context.getString(R.string.chromium_fingerprint)))
+    ))
 }

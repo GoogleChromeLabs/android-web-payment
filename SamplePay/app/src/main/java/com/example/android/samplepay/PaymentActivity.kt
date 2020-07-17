@@ -186,6 +186,7 @@ class PaymentActivity : AppCompatActivity() {
                 selectedShippingOptionId = selected.tag.toString()
                 val shippingOptionChangeIntent =
                     Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)
+                shippingOptionChangeIntent.putExtra("callingBrowserPackage", callingPackage)
                 shippingOptionChangeIntent.putExtra("selectedOptionId", selectedShippingOptionId)
                 payButton.isEnabled = false
                 startActivityForResult(
@@ -250,6 +251,7 @@ class PaymentActivity : AppCompatActivity() {
         shippingAddresses.setOnCheckedChangeListener { _, checkedId ->
             val shippingAddressChangeIntent =
                 Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)
+            shippingAddressChangeIntent.putExtra("callingBrowserPackage", callingPackage)
             shippingAddressChangeIntent.putExtra(
                 "selectedAddress", addresses[checkedId]?.asBundle()
             )
@@ -351,6 +353,7 @@ class PaymentActivity : AppCompatActivity() {
         val promotionCode = findViewById<EditText>(R.id.promotion_code).text.toString()
         val paymentMethodChangeIntent =
             Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)
+        paymentMethodChangeIntent.putExtra("callingBrowserPackage", callingPackage)
         paymentMethodChangeIntent.putExtra("promotionCode", promotionCode)
         payButton.isEnabled = false
         startActivityForResult(

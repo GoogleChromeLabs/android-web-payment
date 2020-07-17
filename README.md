@@ -9,6 +9,12 @@ This is an Android payment app sample that works with Web PaymentRequest API.
 - SampleMerchant
   - A web merchant site
 
+## Test the Android payment App
+
+1. Download and install app-debug.apk
+2. Open the Chrome browser and navigate to  https://sample-pay-ss.firebaseapp.com
+3. Click on "PAY" button.
+
 ## SamplePay (Web)
 
 The project can be deployed to [Firebase Hosting](https://firebase.google.com/docs/hosting).

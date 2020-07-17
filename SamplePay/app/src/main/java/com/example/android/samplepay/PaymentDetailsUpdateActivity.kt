@@ -33,6 +33,7 @@ private const val TAG = "PaymentDetailsUpdate"
 
 class PaymentDetailsUpdateActivity : Activity() {
     private var isBound: Boolean = false
+    private lateinit var callingBrowserPackage: String
     private var promotionCode: String? = null
     private var selectedOptionId: String? = null
     private lateinit var selectedAddress: Bundle
@@ -40,6 +41,7 @@ class PaymentDetailsUpdateActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        callingBrowserPackage = intent.getStringExtra("callingBrowserPackage")
         promotionCode = intent.getStringExtra("promotionCode")
         selectedOptionId = intent.getStringExtra("selectedOptionId")
         selectedAddress = intent.getBundleExtra("selectedAddress") ?: Bundle()
@@ -102,7 +104,7 @@ class PaymentDetailsUpdateActivity : Activity() {
     private fun bind() {
         val intent = Intent()
         intent.setClassName(
-            "org.chromium.chrome",
+            callingBrowserPackage,
             "org.chromium.components.payments.PaymentDetailsUpdateService"
         )
         intent.action = IPaymentDetailsUpdateService::class.java.name

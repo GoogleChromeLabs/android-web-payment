@@ -69,6 +69,7 @@ class PaymentActivity : AppCompatActivity() {
         val payerName: View = findViewById(R.id.payer_name)
         val payerPhone: View = findViewById(R.id.payer_phone)
         val payerEmail: View = findViewById(R.id.payer_email)
+        val contact: TextView = findViewById(R.id.contact_title)
 
         payButton = findViewById(R.id.pay)
         payButton.setOnClickListener { pay() }
@@ -76,6 +77,8 @@ class PaymentActivity : AppCompatActivity() {
         promotionButton = findViewById(R.id.promotion_button)
         promotionButton.setOnClickListener { applyPromotion() }
 
+        shippingOptions = findViewById(R.id.shipping_options)
+        shippingAddresses = findViewById(R.id.shipping_addresses)
 
         // Bind values from ViewModel to views.
         viewModel.merchantName.observe(this) { name ->
@@ -116,6 +119,7 @@ class PaymentActivity : AppCompatActivity() {
         }
         viewModel.shipping.observe(this) {
             shippingOptions.isVisible = it
+            shippingAddresses.isVisible = it
         }
 
         viewModel.payerName.observe(this) {
@@ -128,6 +132,10 @@ class PaymentActivity : AppCompatActivity() {
 
         viewModel.payerEmail.observe(this) {
             payerEmail.isVisible = it
+        }
+
+        viewModel.contact.observe(this) {
+            contact.isVisible = it
         }
 
         if (savedInstanceState == null) {
@@ -163,7 +171,6 @@ class PaymentActivity : AppCompatActivity() {
             "${paymentParams.paymentOptions.shippingType.capitalize()} Options:"
 
         errorMessage = ""
-        shippingOptions = findViewById(R.id.shipping_options)
         shippingOptions.removeAllViews()
         paymentParams.shippingOptions?.forEach {
             val radioButton = RadioButton(this)
@@ -247,7 +254,6 @@ class PaymentActivity : AppCompatActivity() {
         )
         (findViewById<RadioButton>(R.id.uk_address)).text = addresses[R.id.uk_address].toString()
 
-        shippingAddresses = findViewById(R.id.shipping_addresses)
         shippingAddresses.setOnCheckedChangeListener { _, checkedId ->
             val shippingAddressChangeIntent =
                 Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)

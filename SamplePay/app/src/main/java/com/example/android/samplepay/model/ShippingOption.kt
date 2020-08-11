@@ -30,8 +30,8 @@ data class ShippingOption(
             return ShippingOption(
                 id = extras.getString("id", ""),
                 label = extras.getString("label", ""),
-                amountCurrency = extras.getBundle("amount")!!.getString("currency", ""),
-                amountValue = extras.getBundle("amount")!!.getString("value", ""),
+                amountCurrency = extras.getBundle("amount")?.getString("currency", "") ?: "",
+                amountValue = extras.getBundle("amount")?.getString("value", "") ?: "",
                 selected = extras.getBoolean("selected", false)
             )
         }

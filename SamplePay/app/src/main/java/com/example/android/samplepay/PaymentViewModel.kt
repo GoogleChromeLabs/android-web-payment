@@ -36,6 +36,7 @@ class PaymentViewModel(application: Application) : AndroidViewModel(application)
     private val _payerName = MutableLiveData<Boolean>()
     private val _payerPhone = MutableLiveData<Boolean>()
     private val _payerEmail = MutableLiveData<Boolean>()
+    private val _contact = MutableLiveData<Boolean>()
     private val _shipping = MutableLiveData<Boolean>()
 
     val origin: LiveData<String?> = _origin
@@ -46,6 +47,7 @@ class PaymentViewModel(application: Application) : AndroidViewModel(application)
     var payerName: MutableLiveData<Boolean> = _payerName
     var payerPhone: MutableLiveData<Boolean> = _payerPhone
     var payerEmail: MutableLiveData<Boolean> = _payerEmail
+    var contact: MutableLiveData<Boolean> = _contact
     var shipping: MutableLiveData<Boolean> = _shipping
 
     fun initialize(params: PaymentParams, error: String?, promotionError: String) {
@@ -60,6 +62,9 @@ class PaymentViewModel(application: Application) : AndroidViewModel(application)
         _payerName.value = params.paymentOptions.requestPayerName
         _payerPhone.value = params.paymentOptions.requestPayerPhone
         _payerEmail.value = params.paymentOptions.requestPayerEmail
+        _contact.value = params.paymentOptions.requestPayerName ||
+                params.paymentOptions.requestPayerPhone ||
+                params.paymentOptions.requestPayerEmail
         _shipping.value = params.paymentOptions.requestShipping
     }
 }

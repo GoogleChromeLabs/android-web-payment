@@ -31,6 +31,7 @@
     <string name="chrome_dev_fingerprint" translatable="false">90:44:EE:5F:EE:4B:BC:5E:21:DD:44:66:54:31:C4:EB:1F:1F:71:A3:27:16:A0:BC:92:7B:CB:B3:92:33:CA:BF</string>
     <string name="chrome_canary_fingerprint" translatable="false">20:19:DF:A1:FB:23:EF:BF:70:C5:BC:D1:44:3C:5B:EA:B0:4F:3F:2F:F4:36:6E:9A:C1:E3:45:76:39:A2:4C:FC</string>
     <string name="chromium_fingerprint" translatable="false">32:A2:FC:74:D7:31:10:58:59:E5:A8:5D:F1:6D:95:F1:02:D8:5B:22:09:9B:80:64:C5:D8:91:5C:61:DA:D1:E0</string>
+    <string name="googlequicksearchbox_fingerprint">F0:FD:6C:5B:41:0F:25:CB:25:C3:B5:33:46:C8:97:2F:AE:30:F8:EE:74:11:DF:91:04:80:AD:6B:2D:60:DB:83</string>
     <string name="your_full_name">Your Full Name</string>
     <string name="your_phone_number">Your Phone Number</string>
     <string name="your_email_address">Your Email Address</string>

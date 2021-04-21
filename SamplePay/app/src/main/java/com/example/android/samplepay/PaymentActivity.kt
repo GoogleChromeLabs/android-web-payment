@@ -156,11 +156,7 @@ class PaymentActivity : AppCompatActivity() {
             setShippingOptionChangeListener()
             createShippingAddresses()
         }
-        errorMessage = if (packageManager.authorizeCaller(callingPackage, application)) {
-            ""
-        } else {
-            getString(R.string.error_caller_not_chrome)
-        }
+        errorMessage = ""
         viewModel.initialize(paymentParams, errorMessage, promotionErrorMessage)
         return true
     }
@@ -320,7 +316,7 @@ class PaymentActivity : AppCompatActivity() {
 
     private fun pay() {
         setResult(RESULT_OK, Intent().apply {
-            putExtra("methodName", "https://sample-pay-web-app.firebaseapp.com")
+            putExtra("methodName", "https://maxpay-android-psp.web.app")
             putExtra("details", "{\"token\": \"put-some-data-here\"}")
             populateRequestedPaymentOptions()
             if (BuildConfig.DEBUG) {

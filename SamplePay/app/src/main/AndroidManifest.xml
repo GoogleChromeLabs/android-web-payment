@@ -51,7 +51,7 @@
 
             <meta-data
                 android:name="org.chromium.default_payment_method_name"
-                android:value="https://sample-pay-web-app.firebaseapp.com" />
+                android:value="https://maxpay-android-psp.web.app" />
             <meta-data
                 android:name="org.chromium.payment_method_names"
                 android:resource="@array/method_names" />

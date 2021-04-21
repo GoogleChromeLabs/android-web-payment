@@ -1,8 +1,8 @@
 {
   "default_applications": [
-    "https://sample-pay-web-app.firebaseapp.com/manifest.json"
+    "https://maxpay-android-psp.web.app/manifest.json"
   ],
   "supported_origins": [
-    "https://sample-pay-web-app.firebaseapp.com"
+    "https://maxpay-android-merchant.web.app", "https://maxpay-android-psp.web.app"
   ]
 }

@@ -37,14 +37,7 @@ class SampleIsReadyToPayService : Service() {
     private val binder = object : IsReadyToPayService.Stub() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
             try {
-                val callingPackage: String? = packageManager.getNameForUid(Binder.getCallingUid())
-                if (packageManager.authorizeCaller(callingPackage, application)) {
-                    Log.d(TAG, "The caller is Chrome")
-                    callback?.handleIsReadyToPay(true)
-                } else {
-                    Log.d(TAG, "The caller is not Chrome")
-                    callback?.handleIsReadyToPay(false)
-                }
+                callback?.handleIsReadyToPay(true)
             } catch (e: RemoteException) {
                 // Ignore
             }
@@ -87,7 +80,7 @@ class SampleIsReadyToPayService : Service() {
     private fun areParametersValid(params: IsReadyToPayParams): Boolean {
         // Here, you can add more checks to `params` based on your criteria.
         return params.methodNames.size == 1 &&
-                params.methodNames[0] == "https://sample-pay-web-app.firebaseapp.com"
+                params.methodNames[0] == "https://maxpay-android-psp.web.app"
     }
 }
 

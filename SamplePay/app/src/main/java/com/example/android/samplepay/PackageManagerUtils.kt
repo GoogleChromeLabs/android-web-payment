@@ -72,5 +72,7 @@ fun PackageManager.authorizeCaller(packageName: String?, context: Context): Bool
         packageName, setOf(parseFingerprint(context.getString(R.string.chrome_canary_fingerprint)))
     )) || (packageName == "org.chromium.chrome" && hasSigningCertificates(
         packageName, setOf(parseFingerprint(context.getString(R.string.chromium_fingerprint)))
-    ))
+    )) || (packageName == "com.google.android.googlequicksearchbox" && hasSigningCertificates(
+        packageName, setOf(parseFingerprint(context.getString(R.string.googlequicksearchbox_fingerprint))
+        )))
 }

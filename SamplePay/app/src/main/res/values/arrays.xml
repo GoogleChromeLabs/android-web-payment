@@ -16,8 +16,7 @@
 -->
 <resources>
     <string-array name="method_names">
-        <item>https://sample-pay-web-app.firebaseapp.com</item>
-        <item>basic-card</item>
+        <item>https://maxpay-android-psp.web.app</item>
     </string-array>
     <string-array name="supported_delegations">
         <item>shippingAddress</item>

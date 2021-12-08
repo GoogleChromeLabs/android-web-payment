@@ -16,7 +16,12 @@
 -->
 <resources>
     <string-array name="method_names">
+<<<<<<< HEAD
+        <item>https://maxpay-android-psp.web.app</item>
+=======
         <item>https://sample-pay-web-app.firebaseapp.com</item>
+        <item>basic-card</item>
+>>>>>>> parent of a709b6e (save)
     </string-array>
     <string-array name="supported_delegations">
         <item>shippingAddress</item>

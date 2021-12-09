@@ -7,15 +7,15 @@
       "**/node_modules/**"
     ],
     "headers": [
-        {
-            "source": "/",
-            "headers": [
-                {
-                    "key": "Link",
-                    "value": "<https://maxpay-android-psp.web.app/payment-manifest.json>; rel=\"payment-method-manifest\""
-                }
-            ]
-        }
+      {
+        "source": "/",
+        "headers": [
+          {
+            "key": "Link",
+            "value": "<https://sample-pay-web-app.firebaseapp.com/payment-manifest.json>; rel=\"payment-method-manifest\""
+          }
+        ]
+      }
     ]
   }
 }

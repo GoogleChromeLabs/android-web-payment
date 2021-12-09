@@ -43,7 +43,6 @@ class PaymentDetailsUpdateActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         callingBrowserPackage = intent.getStringExtra("callingBrowserPackage")
-        logIfDebug("callingBrowserPackage: " + callingBrowserPackage)
         promotionCode = intent.getStringExtra("promotionCode")
         selectedOptionId = intent.getStringExtra("selectedOptionId")
         selectedAddress = intent.getBundleExtra("selectedAddress") ?: Bundle()
@@ -73,7 +72,7 @@ class PaymentDetailsUpdateActivity : Activity() {
                         logIfDebug("changePaymentMethod called.")
                         val methodData = Bundle()
                         methodData.putString(
-                            "methodName", "https://maxpay-android-psp.web.app"
+                            "methodName", "https://sample-pay-web-app.firebaseapp.com"
                         )
                         val details = JSONObject()
                         details.put("promotionCode", promotionCode)

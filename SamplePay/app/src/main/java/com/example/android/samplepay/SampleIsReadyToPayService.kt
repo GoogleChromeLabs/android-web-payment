@@ -87,7 +87,7 @@ class SampleIsReadyToPayService : Service() {
     private fun areParametersValid(params: IsReadyToPayParams): Boolean {
         // Here, you can add more checks to `params` based on your criteria.
         return params.methodNames.size == 1 &&
-                params.methodNames[0] == "https://sample-pay-web-app.firebaseapp.com"
+                params.methodNames[0] == "https://sample-pay-e6bb3.firebaseapp.com"
     }
 }
 

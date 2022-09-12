@@ -35,7 +35,9 @@
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
         </activity>
 
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -44,7 +46,8 @@
 
         <activity
             android:name=".PaymentActivity"
-            android:theme="@style/Theme.SamplePay.Dialog">
+            android:theme="@style/Theme.SamplePay.Dialog"
+            android:exported="true">
             <intent-filter>
                 <action android:name="org.chromium.intent.action.PAY" />
             </intent-filter>

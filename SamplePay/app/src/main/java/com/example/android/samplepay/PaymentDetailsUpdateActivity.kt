@@ -42,7 +42,7 @@ class PaymentDetailsUpdateActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        callingBrowserPackage = intent.getStringExtra("callingBrowserPackage")
+        callingBrowserPackage = intent.getStringExtra("callingBrowserPackage")!!
         promotionCode = intent.getStringExtra("promotionCode")
         selectedOptionId = intent.getStringExtra("selectedOptionId")
         selectedAddress = intent.getBundleExtra("selectedAddress") ?: Bundle()

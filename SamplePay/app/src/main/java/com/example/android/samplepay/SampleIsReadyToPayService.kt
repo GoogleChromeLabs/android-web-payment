@@ -18,7 +18,6 @@ package com.example.android.samplepay
 
 import android.app.Service
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.IBinder
 import android.os.RemoteException
@@ -66,7 +65,7 @@ class SampleIsReadyToPayService : Service() {
         }
     }
 
-    override fun onBind(intent: Intent?): IBinder? {
+    override fun onBind(intent: Intent?): IBinder {
         val extras = intent?.extras ?: return rejectingBinder
         val params = IsReadyToPayParams.from(extras)
         if (BuildConfig.DEBUG) {
@@ -87,7 +86,7 @@ class SampleIsReadyToPayService : Service() {
     private fun areParametersValid(params: IsReadyToPayParams): Boolean {
         // Here, you can add more checks to `params` based on your criteria.
         return params.methodNames.size == 1 &&
-                params.methodNames[0] == "https://sample-pay-e6bb3.firebaseapp.com"
+                params.methodNames[0] == "https://sample-pay-e6bb3.firebaseapp.com/payment-manifest.json"
     }
 }
 

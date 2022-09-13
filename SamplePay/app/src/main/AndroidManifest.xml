@@ -54,10 +54,7 @@
 
             <meta-data
                 android:name="org.chromium.default_payment_method_name"
-                android:value="https://sample-pay-e6bb3.firebaseapp.com" />
-            <meta-data
-                android:name="org.chromium.payment_method_names"
-                android:resource="@array/method_names" />
+                android:value="https://sample-pay-e6bb3.firebaseapp.com/payment-manifest.json" />
             <meta-data
                 android:name="org.chromium.payment_supported_delegations"
                 android:resource="@array/supported_delegations" />

@@ -320,7 +320,7 @@ class PaymentActivity : AppCompatActivity() {
 
     private fun pay() {
         setResult(RESULT_OK, Intent().apply {
-            putExtra("methodName", "https://sample-pay-e6bb3.firebaseapp.com")
+            putExtra("methodName", "https://sample-pay-e6bb3.firebaseapp.com/payment-manifest.json")
             putExtra("details", "{\"token\": \"put-some-data-here\"}")
             populateRequestedPaymentOptions()
             if (BuildConfig.DEBUG) {

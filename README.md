@@ -30,11 +30,7 @@ The project can be deployed to [Firebase Hosting](https://firebase.google.com/do
 ## SamplePay (Android)
 
 1. Import the project path (`SamplePay/`) to Android Studio.
-2. Modify these files and change the domain name to yours.
-   - SamplePay/app/src/main/AndroidManifest.xml
-   - SamplePay/app/src/main/res/values/arrays.xml
-   - SamplePay/app/src/main/java/com/example/android/samplepay/PaymentActivity.kt
-   - SamplePay/app/src/main/java/com/example/android/samplepay/SampleIsReadyToPayService.kt
+2. Modify `SamplePay/gradle.properties` and change the domain name to yours.
 3. Run
 
 ## SampleMerchant

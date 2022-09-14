@@ -26,6 +26,10 @@ android {
         versionCode 1
         versionName '1.0'
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+
+        // Use the method name configuration in the 'gradle.properties' file.
+        buildConfigField "String", "SAMPLE_PAY_METHOD_NAME", "\"${project.property("samplePayMethodName")}\""
+        resValue "string", "sample_pay_method_name", project.property("samplePayMethodName")
     }
     buildTypes {
         release {

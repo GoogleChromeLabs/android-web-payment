@@ -15,9 +15,6 @@
   ~ limitations under the License.
 -->
 <resources>
-    <string-array name="method_names">
-        <item>https://sample-pay-e6bb3.firebaseapp.com</item>
-    </string-array>
     <string-array name="supported_delegations">
         <item>shippingAddress</item>
         <item>payerName</item>

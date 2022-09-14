@@ -72,7 +72,7 @@ class PaymentDetailsUpdateActivity : Activity() {
                         logIfDebug("changePaymentMethod called.")
                         val methodData = Bundle()
                         methodData.putString(
-                            "methodName", "https://sample-pay-web-app.firebaseapp.com"
+                            "methodName", BuildConfig.SAMPLE_PAY_METHOD_NAME
                         )
                         val details = JSONObject()
                         details.put("promotionCode", promotionCode)

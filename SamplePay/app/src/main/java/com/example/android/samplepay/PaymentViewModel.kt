@@ -20,9 +20,9 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.android.samplepay.model.PaymentAmount
-import com.example.android.samplepay.model.PaymentParams
+import com.example.android.samplepay.model.*
 
 private const val TAG = "PaymentViewModel"
 
@@ -31,40 +31,110 @@ class PaymentViewModel(application: Application) : AndroidViewModel(application)
     private val _origin = MutableLiveData<String>()
     private val _merchantName = MutableLiveData<String>()
     private val _error = MutableLiveData<String>()
+    private val _addressErrors = MutableLiveData<AddressErrors>()
     private val _promotionError = MutableLiveData<String>()
     private val _total = MutableLiveData<PaymentAmount?>()
-    private val _payerName = MutableLiveData<Boolean>()
-    private val _payerPhone = MutableLiveData<Boolean>()
-    private val _payerEmail = MutableLiveData<Boolean>()
-    private val _contact = MutableLiveData<Boolean>()
-    private val _shipping = MutableLiveData<Boolean>()
+    private val _paymentOptions = MutableLiveData<PaymentOptions>()
+    private val _shippingOptions = MutableLiveData<List<ShippingOption>>()
 
     val origin: LiveData<String?> = _origin
     val merchantName: LiveData<String?> = _merchantName
-    val error: LiveData<String> = _error
+
+    val error: LiveData<String> = combine(_error, _addressErrors) { e, ae ->
+        buildString {
+            append(e)
+            if (ae != null) {
+                appendLine()
+                append(ae.toString())
+            }
+        }
+    }
+
     val promotionError: LiveData<String> = _promotionError
     val total: LiveData<PaymentAmount?> = _total
-    var payerName: MutableLiveData<Boolean> = _payerName
-    var payerPhone: MutableLiveData<Boolean> = _payerPhone
-    var payerEmail: MutableLiveData<Boolean> = _payerEmail
-    var contact: MutableLiveData<Boolean> = _contact
-    var shipping: MutableLiveData<Boolean> = _shipping
+    val paymentOptions: LiveData<PaymentOptions> = _paymentOptions
+    val shippingOptions: LiveData<List<ShippingOption>> = _shippingOptions
+    val paymentAddresses: LiveData<Map<Int, PaymentAddress>> = MutableLiveData(
+        mapOf(
+            R.id.canada_address to
+                    PaymentAddress(
+                        listOf("111 Richmond st. West #12"),
+                        "CA",
+                        "Canada",
+                        "Toronto",
+                        "",
+                        "Google",
+                        "+14169158200",
+                        "M5H2G4",
+                        "John Smith",
+                        "Ontario",
+                        ""
+                    ),
+            R.id.us_address to
+                    PaymentAddress(
+                        listOf("1875 Explorer St #1000"),
+                        "US",
+                        "United States",
+                        "Reston",
+                        "",
+                        "Google",
+                        "+12023705600",
+                        "20190",
+                        "John Smith",
+                        "Virginia",
+                        ""
+                    ),
+            R.id.uk_address to
+                    PaymentAddress(
+                        listOf("1-13 St Giles High St"),
+                        "UK",
+                        "United Kingdom",
+                        "London",
+                        "West End",
+                        "Google",
+                        "+442070313000",
+                        "WC2H 8AG",
+                        "John Smith",
+                        "",
+                        ""
+                    )
+        )
+    )
 
-    fun initialize(params: PaymentParams, error: String?, promotionError: String) {
+    fun initialize(params: PaymentParams, callingPackage: String?) {
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "$params")
         }
-        _error.value = error
-        _promotionError.value = promotionError
+        val application: Application = getApplication()
+        _error.value = if (application.authorizeCaller(callingPackage)) {
+            ""
+        } else {
+            application.getString(R.string.error_caller_not_chrome)
+        }
         _total.value = params.total
         _origin.value = params.topLevelOrigin
         _merchantName.value = params.merchantName
-        _payerName.value = params.paymentOptions.requestPayerName
-        _payerPhone.value = params.paymentOptions.requestPayerPhone
-        _payerEmail.value = params.paymentOptions.requestPayerEmail
-        _contact.value = params.paymentOptions.requestPayerName ||
-                params.paymentOptions.requestPayerPhone ||
-                params.paymentOptions.requestPayerEmail
-        _shipping.value = params.paymentOptions.requestShipping
+        _paymentOptions.value = params.paymentOptions
+        _shippingOptions.value = params.shippingOptions
+    }
+
+    fun updateShippingOptions(shippingOptions: List<ShippingOption>) {
+        _shippingOptions.value = shippingOptions
+    }
+
+    fun updateTotal(total: PaymentAmount) {
+        _total.value = total
+    }
+
+    fun updateError(error: String) {
+        _error.value = error
+    }
+
+    fun updateAddressErrors(addressErrors: AddressErrors) {
+        _addressErrors.value = addressErrors
+    }
+
+    fun updatePromotionError(promotionError: String) {
+        _promotionError.value = promotionError
     }
 }

@@ -19,13 +19,21 @@ package com.example.android.samplepay.model
 import android.os.Bundle
 
 data class PaymentAddress(
-    val addressLines: Array<String>, val countryCode: String, val country: String,
-    val city: String, val dependentLocality: String, val organization: String, val phone: String,
-    val postalCode: String, val recipient: String, val region: String, val sortingCode: String
+    val addressLines: List<String>,
+    val countryCode: String,
+    val country: String,
+    val city: String,
+    val dependentLocality: String,
+    val organization: String,
+    val phone: String,
+    val postalCode: String,
+    val recipient: String,
+    val region: String,
+    val sortingCode: String
 ) {
     fun asBundle(): Bundle {
         val address = Bundle()
-        address.putStringArray("addressLines", addressLines)
+        address.putStringArray("addressLines", addressLines.toTypedArray())
         address.putString("countryCode", countryCode)
         address.putString("country", country)
         address.putString("city", city)
@@ -42,11 +50,11 @@ data class PaymentAddress(
     override fun toString(): String {
         var address = "$recipient, $organization, "
         addressLines.forEach { addressLine -> address += ("$addressLine, ") }
-        var cityLine: String
-        if (!region.isNullOrEmpty())
-            cityLine = "$city, $region, $postalCode, $country\n"
-        else
-            cityLine = "$dependentLocality, $city, $postalCode, $country\n"
+        val cityLine = if (region.isNotEmpty()) {
+            "$city, $region, $postalCode, $country\n"
+        } else {
+            "$dependentLocality, $city, $postalCode, $country\n"
+        }
         address += cityLine
         return address
     }

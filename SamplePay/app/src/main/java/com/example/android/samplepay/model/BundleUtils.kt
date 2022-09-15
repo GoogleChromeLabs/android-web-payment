@@ -16,12 +16,22 @@
 
 package com.example.android.samplepay.model
 
+import android.os.Build
 import android.os.Bundle
 import org.json.JSONException
 
+@Suppress("DEPRECATION", "UNCHECKED_CAST")
+private fun Bundle.getBundleArray(key: String): Array<Bundle>? {
+    return if (Build.VERSION.SDK_INT >= 33) {
+        getParcelableArray(key, Bundle::class.java)
+    } else {
+        getParcelableArray(key) as Array<Bundle>?
+    }
+}
+
 internal fun Bundle.getCertificateChain(key: String): List<ByteArray> {
-    return getParcelableArray(key)?.map {
-        (it as Bundle).getByteArray("certificate") ?: byteArrayOf()
+    return getBundleArray(key)?.map {
+        it.getByteArray("certificate") ?: byteArrayOf()
     } ?: emptyList()
 }
 
@@ -39,13 +49,11 @@ internal fun Bundle.getPaymentAmount(key: String): PaymentAmount? {
     }
 }
 
-internal fun Bundle.getShippingOptions(key: String): List<ShippingOption>? {
-    return getParcelableArray(key)?.mapNotNull {
-        ShippingOption.from(it as Bundle)
-    }
+internal fun Bundle.getShippingOptions(key: String): List<ShippingOption> {
+    return getBundleArray(key)?.map { ShippingOption.from(it) } ?: emptyList()
 }
 
 internal fun Bundle.getMethodData(key: String): Map<String, String> {
     val b = getBundle(key) ?: return emptyMap()
-    return b.keySet().map { it to b.getString(it, "[]") }.toMap()
+    return b.keySet().associateWith { b.getString(it, "[]") }
 }

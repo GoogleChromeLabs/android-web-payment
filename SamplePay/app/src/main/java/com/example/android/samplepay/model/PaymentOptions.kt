@@ -36,4 +36,7 @@ data class PaymentOptions(
             )
         }
     }
+
+    val requireContact: Boolean
+        get() = requestPayerName || requestPayerPhone || requestPayerEmail
 }

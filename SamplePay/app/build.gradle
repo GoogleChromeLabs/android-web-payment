@@ -31,6 +31,9 @@ android {
         buildConfigField "String", "SAMPLE_PAY_METHOD_NAME", "\"${project.property("samplePayMethodName")}\""
         resValue "string", "sample_pay_method_name", project.property("samplePayMethodName")
     }
+    buildFeatures {
+        viewBinding = true
+    }
     buildTypes {
         release {
             minifyEnabled false

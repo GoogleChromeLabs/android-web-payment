@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-
 package com.example.android.samplepay.model
 
 import android.os.Bundle
@@ -49,37 +48,37 @@ data class AddressErrors(
     }
 
     override fun toString(): String {
-        var error: String = ""
-        if (!addressLines.isNullOrEmpty()) {
-            error = addressLines + "\n"
+        return buildString {
+            if (!addressLines.isNullOrEmpty()) {
+                appendLine(addressLines)
+            }
+            if (!countryCode.isNullOrEmpty()) {
+                appendLine(countryCode)
+            }
+            if (!city.isNullOrEmpty()) {
+                appendLine(city)
+            }
+            if (!dependentLocality.isNullOrEmpty()) {
+                appendLine(dependentLocality)
+            }
+            if (!organization.isNullOrEmpty()) {
+                appendLine(organization)
+            }
+            if (!phone.isNullOrEmpty()) {
+                appendLine(phone)
+            }
+            if (!postalCode.isNullOrEmpty()) {
+                appendLine(postalCode)
+            }
+            if (!recipient.isNullOrEmpty()) {
+                appendLine(recipient)
+            }
+            if (!region.isNullOrEmpty()) {
+                appendLine(region)
+            }
+            if (!sortingCode.isNullOrEmpty()) {
+                appendLine(sortingCode)
+            }
         }
-        if (!countryCode.isNullOrEmpty()) {
-            error += countryCode + "\n"
-        }
-        if (!city.isNullOrEmpty()) {
-            error += city + "\n"
-        }
-        if (!dependentLocality.isNullOrEmpty()) {
-            error += dependentLocality + "\n"
-        }
-        if (!organization.isNullOrEmpty()) {
-            error += organization + "\n"
-        }
-        if (!phone.isNullOrEmpty()) {
-            error = phone + "\n"
-        }
-        if (!postalCode.isNullOrEmpty()) {
-            error += postalCode + "\n"
-        }
-        if (!recipient.isNullOrEmpty()) {
-            error += recipient + "\n"
-        }
-        if (!region.isNullOrEmpty()) {
-            error += region + "\n"
-        }
-        if (!sortingCode.isNullOrEmpty()) {
-            error += sortingCode + "\n"
-        }
-        return error
     }
 }

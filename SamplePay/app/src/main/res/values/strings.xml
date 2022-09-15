@@ -20,7 +20,7 @@
     <string name="home_explanation">
         This is a sample payment app. Use the SampleMerchant web site to initiate a transaction.
     </string>
-    <string name="total_format">Total: %s %s</string>
+    <string name="total_format">Total: %1$s %2$s</string>
     <string name="payment_explanation">
         This is a sample payment app, and no actual payment will be processed.
     </string>
@@ -43,4 +43,7 @@
     <string name="submit">Submit</string>
     <string name="promotion_code">Enter a Valid Code: e.g. 123</string>
     <string name="promotion_title">Promotion Code:</string>
+    <string name="option_title_format">%s Options:</string>
+    <string name="option_format">%1$s, %2$s %3$s</string>
+    <string name="address_title_format">%s Address:</string>
 </resources>

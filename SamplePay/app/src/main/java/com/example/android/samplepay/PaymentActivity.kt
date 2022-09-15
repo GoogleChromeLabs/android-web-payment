@@ -16,23 +16,28 @@
 
 package com.example.android.samplepay
 
-import android.annotation.SuppressLint
-import android.app.Activity
+import android.content.ComponentName
 import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
-import android.view.View
-import android.widget.*
+import android.widget.RadioButton
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatRadioButton
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.observe
-import com.example.android.samplepay.model.PaymentAddress
+import com.example.android.samplepay.databinding.PaymentActivityBinding
 import com.example.android.samplepay.model.PaymentDetailsUpdate
 import com.example.android.samplepay.model.PaymentParams
+import org.chromium.components.payments.IPaymentDetailsUpdateService
+import org.chromium.components.payments.IPaymentDetailsUpdateServiceCallback
+import org.json.JSONObject
+import java.util.*
 import kotlin.math.roundToInt
 
-private const val UPDATE_DETAILS_ACTIVITY_REQUEST_CODE = 0
 private const val TAG = "PaymentActivity"
 
 /**
@@ -41,102 +46,167 @@ private const val TAG = "PaymentActivity"
  * It [returns][setResult] [#RESULT_OK] when the user clicks on the "Pay" button. The "Pay" button
  * is disabled unless the calling app is Chrome.
  */
-class PaymentActivity : AppCompatActivity() {
-    private lateinit var paymentParams: PaymentParams
-    private lateinit var shippingOptions: RadioGroup
-    private lateinit var shippingAddresses: RadioGroup
-    private lateinit var payButton: Button
-    private lateinit var promotionButton: Button
-    private lateinit var selectedShippingOptionId: String
+class PaymentActivity : AppCompatActivity(R.layout.payment_activity) {
+
     private val viewModel: PaymentViewModel by viewModels()
-    private var errorMessage: String = ""
-    private var promotionErrorMessage: String = ""
-    private var addresses: HashMap<Int, PaymentAddress> = HashMap()
+    private val binding by viewBindings(PaymentActivityBinding::bind)
+
+    private var paymentDetailsUpdateService: IPaymentDetailsUpdateService? = null
+
+    private var shippingOptionsListenerEnabled = false
+    private var shippingAddressListenerEnabled = false
+
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, service: IBinder?) {
+            Log.d(TAG, "IPaymentDetailsUpdateService connected")
+            paymentDetailsUpdateService = IPaymentDetailsUpdateService.Stub.asInterface(service)
+        }
+
+        override fun onServiceDisconnected(className: ComponentName?) {
+            Log.d(TAG, "IPaymentDetailsUpdateService disconnected")
+            paymentDetailsUpdateService = null
+        }
+    }
+
+    private val callback = object : IPaymentDetailsUpdateServiceCallback.Stub() {
+        override fun paymentDetailsNotUpdated() {
+            Log.d("TAG", "Payment details did not change.")
+        }
+
+        override fun updateWith(newPaymentDetails: Bundle) {
+            val update = PaymentDetailsUpdate.from(newPaymentDetails)
+            runOnUiThread {
+                update.shippingOptions?.let { viewModel.updateShippingOptions(it) }
+                update.total?.let { viewModel.updateTotal(it) }
+                viewModel.updateError(update.error ?: "")
+                update.addressErrors?.let { viewModel.updateAddressErrors(it) }
+                viewModel.updatePromotionError(update.stringifiedPaymentMethodErrors ?: "")
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.payment_activity)
-        val contentView: View = findViewById(R.id.payment)
-        contentView.layoutParams.width = (resources.displayMetrics.widthPixels * 0.90).roundToInt()
+        binding.payment.layoutParams.width =
+            (resources.displayMetrics.widthPixels * 0.90).roundToInt()
         setSupportActionBar(findViewById(R.id.toolbar))
 
-        // View references.
-        val merchantName: TextView = findViewById(R.id.merchant_name)
-        val origin: TextView = findViewById(R.id.origin)
-        val error: TextView = findViewById(R.id.error)
-        val promotionError: TextView = findViewById(R.id.promotion_error)
-        val total: TextView = findViewById(R.id.total)
-        val payerName: View = findViewById(R.id.payer_name)
-        val payerPhone: View = findViewById(R.id.payer_phone)
-        val payerEmail: View = findViewById(R.id.payer_email)
-        val contact: TextView = findViewById(R.id.contact_title)
-
-        payButton = findViewById(R.id.pay)
-        payButton.setOnClickListener { pay() }
-
-        promotionButton = findViewById(R.id.promotion_button)
-        promotionButton.setOnClickListener { applyPromotion() }
-
-        shippingOptions = findViewById(R.id.shipping_options)
-        shippingAddresses = findViewById(R.id.shipping_addresses)
-
         // Bind values from ViewModel to views.
-        viewModel.merchantName.observe(this) { name ->
-            merchantName.isVisible = name != null
-            merchantName.text = name
+        viewModel.merchantName.observe(this) { merchantName ->
+            binding.merchantName.isVisible = merchantName != null
+            binding.merchantName.text = merchantName
         }
-        viewModel.origin.observe(this) {
-            origin.isVisible = it != null
-            origin.text = it
+        viewModel.origin.observe(this) { origin ->
+            binding.origin.isVisible = origin != null
+            binding.origin.text = origin
         }
-        viewModel.error.observe(this) { e ->
-            if (e.isEmpty()) { // No error
-                error.isVisible = false
-                error.text = null
-                payButton.isEnabled = true
+        viewModel.error.observe(this) { error ->
+            if (error.isEmpty()) { // No error
+                binding.error.isVisible = false
+                binding.error.text = null
+                binding.pay.isEnabled = true
             } else {
-                error.isVisible = true
-                error.text = e
-                payButton.isEnabled = false
+                binding.error.isVisible = true
+                binding.error.text = error
+                binding.pay.isEnabled = false
             }
         }
-        viewModel.promotionError.observe(this) { e ->
-            if (e.isEmpty()) { // No promotion error
-                promotionError.isVisible = false
-                promotionError.text = null
+        viewModel.promotionError.observe(this) { promotionError ->
+            if (promotionError.isEmpty()) { // No promotion error
+                binding.promotionError.isVisible = false
+                binding.promotionError.text = null
             } else {
-                promotionError.isVisible = true
-                promotionError.text = e
+                binding.promotionError.isVisible = true
+                binding.promotionError.text = promotionError
             }
         }
-        viewModel.total.observe(this) { t ->
-            total.isVisible = t != null
-            total.text = if (t != null) {
-                getString(R.string.total_format, t.currency, t.value)
+        viewModel.total.observe(this) { total ->
+            binding.total.isVisible = total != null
+            binding.total.text = if (total != null) {
+                getString(R.string.total_format, total.currency, total.value)
             } else {
                 null
             }
         }
-        viewModel.shipping.observe(this) {
-            shippingOptions.isVisible = it
-            shippingAddresses.isVisible = it
+        viewModel.paymentOptions.observe(this) { paymentOptions ->
+            binding.payerName.isVisible = paymentOptions.requestPayerName
+            binding.payerPhone.isVisible = paymentOptions.requestPayerPhone
+            binding.payerEmail.isVisible = paymentOptions.requestPayerEmail
+            binding.contactTitle.isVisible = paymentOptions.requireContact
+            binding.shippingOptions.isVisible = paymentOptions.requestShipping
+            binding.shippingAddresses.isVisible = paymentOptions.requestShipping
+            binding.optionTitle.text = formatTitle(
+                R.string.option_title_format,
+                paymentOptions.shippingType
+            )
+            binding.addressTitle.text = formatTitle(
+                R.string.address_title_format,
+                paymentOptions.shippingType
+            )
+        }
+        viewModel.shippingOptions.observe(this) { shippingOptions ->
+            shippingOptionsListenerEnabled = false
+            binding.shippingOptions.removeAllViews()
+            var selectedId = 0
+            for (option in shippingOptions) {
+                binding.shippingOptions.addView(
+                    AppCompatRadioButton(this).apply {
+                        text = getString(
+                            R.string.option_format,
+                            option.label,
+                            option.amountCurrency,
+                            option.amountValue
+                        )
+                        tag = option.id
+                        id = ViewCompat.generateViewId()
+                        if (option.selected) {
+                            selectedId = id
+                        }
+                    }
+                )
+            }
+            if (selectedId != 0) {
+                binding.shippingOptions.check(selectedId)
+            }
+            shippingOptionsListenerEnabled = true
+        }
+        viewModel.paymentAddresses.observe(this) { addresses ->
+            shippingAddressListenerEnabled = false
+            binding.canadaAddress.text = addresses[R.id.canada_address].toString()
+            binding.usAddress.text = addresses[R.id.us_address].toString()
+            binding.ukAddress.text = addresses[R.id.uk_address].toString()
+            shippingAddressListenerEnabled = true
         }
 
-        viewModel.payerName.observe(this) {
-            payerName.isVisible = it
+        // Handle UI events.
+        binding.promotionButton.setOnClickListener {
+            val promotionCode = binding.promotionCode.text.toString()
+            paymentDetailsUpdateService?.changePaymentMethod(
+                Bundle().apply {
+                    putString("methodName", BuildConfig.SAMPLE_PAY_METHOD_NAME)
+                    putString("details", JSONObject().apply {
+                        put("promotionCode", promotionCode)
+                    }.toString())
+                },
+                callback
+            )
         }
-
-        viewModel.payerPhone.observe(this) {
-            payerPhone.isVisible = it
+        binding.shippingOptions.setOnCheckedChangeListener { group, checkedId ->
+            if (shippingOptionsListenerEnabled) {
+                group.findViewById<RadioButton>(checkedId)?.let { button ->
+                    val shippingOptionId = button.tag as String
+                    paymentDetailsUpdateService?.changeShippingOption(shippingOptionId, callback)
+                }
+            }
         }
-
-        viewModel.payerEmail.observe(this) {
-            payerEmail.isVisible = it
+        binding.shippingAddresses.setOnCheckedChangeListener { _, checkedId ->
+            if (shippingAddressListenerEnabled) {
+                viewModel.paymentAddresses.value?.get(checkedId)?.let { address ->
+                    paymentDetailsUpdateService?.changeShippingAddress(address.asBundle(), callback)
+                }
+            }
         }
-
-        viewModel.contact.observe(this) {
-            contact.isVisible = it
-        }
+        binding.pay.setOnClickListener { pay() }
 
         if (savedInstanceState == null) {
             val result = handleIntent()
@@ -150,167 +220,33 @@ class PaymentActivity : AppCompatActivity() {
             return false
         }
         val extras = intent.extras ?: return false
-        paymentParams = PaymentParams.from(extras)
-        if (paymentParams.paymentOptions.requestShipping) {
-            createShippingOptions()
-            setShippingOptionChangeListener()
-            createShippingAddresses()
-        }
-        errorMessage = if (packageManager.authorizeCaller(callingPackage, application)) {
-            ""
-        } else {
-            getString(R.string.error_caller_not_chrome)
-        }
-        viewModel.initialize(paymentParams, errorMessage, promotionErrorMessage)
+        viewModel.initialize(PaymentParams.from(extras), callingPackage)
         return true
     }
 
-    @SuppressLint("NewApi")
-    private fun createShippingOptions() {
-        findViewById<TextView>(R.id.option_title).text =
-            "${paymentParams.paymentOptions.shippingType.capitalize()} Options:"
-
-        errorMessage = ""
-        shippingOptions.removeAllViews()
-        paymentParams.shippingOptions?.forEach {
-            val radioButton = RadioButton(this)
-            val label = "${it.label}, ${it.amountCurrency} ${it.amountValue}"
-            radioButton.text = label
-            radioButton.tag = it.id
-            radioButton.id = View.generateViewId()
-            shippingOptions.addView(radioButton)
-            if (it.selected) {
-                shippingOptions.check(radioButton.id)
-                selectedShippingOptionId = it.id
-            }
-        }
+    override fun onStart() {
+        super.onStart()
+        bindPaymentDetailsUpdateService()
     }
 
-    private fun setShippingOptionChangeListener() {
-        shippingOptions.setOnCheckedChangeListener { group, checkedId ->
-            val selected: RadioButton = group.findViewById(checkedId)
-            if (selected.tag.toString() != selectedShippingOptionId) {
-                selectedShippingOptionId = selected.tag.toString()
-                val shippingOptionChangeIntent =
-                    Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)
-                shippingOptionChangeIntent.putExtra("callingBrowserPackage", callingPackage)
-                shippingOptionChangeIntent.putExtra("selectedOptionId", selectedShippingOptionId)
-                payButton.isEnabled = false
-                startActivityForResult(
-                    shippingOptionChangeIntent, UPDATE_DETAILS_ACTIVITY_REQUEST_CODE
-                )
-            }
-        }
+    override fun onStop() {
+        super.onStop()
+        unbindService(serviceConnection)
     }
 
-    private fun createShippingAddresses() {
-        findViewById<TextView>(R.id.address_title).text =
-            "${paymentParams.paymentOptions.shippingType.capitalize()} Address:"
-
-        // Todo: allow the user to add/edit address
-        addresses[R.id.canada_address] = PaymentAddress(
-            arrayOf("111 Richmond st. West #12"),
-            "CA",
-            "Canada",
-            "Toronto",
-            "",
-            "Google",
-            "+14169158200",
-            "M5H2G4",
-            "John Smith",
-            "Ontario",
-            ""
-        )
-        (findViewById<RadioButton>(R.id.canada_address)).text =
-            addresses[R.id.canada_address].toString()
-
-        addresses[R.id.us_address] = PaymentAddress(
-            arrayOf("1875 Explorer St #1000"),
-            "US",
-            "United States",
-            "Reston",
-            "",
-            "Google",
-            "+12023705600",
-            "20190",
-            "John Smith",
-            "Virginia",
-            ""
-        )
-        (findViewById<RadioButton>(R.id.us_address)).text = addresses[R.id.us_address].toString()
-
-        addresses[R.id.uk_address] = PaymentAddress(
-            arrayOf("1-13 St Giles High St"),
-            "UK",
-            "United Kingdom",
-            "London",
-            "West End",
-            "Google",
-            "+442070313000",
-            "WC2H 8AG",
-            "John Smith",
-            "",
-            ""
-        )
-        (findViewById<RadioButton>(R.id.uk_address)).text = addresses[R.id.uk_address].toString()
-
-        shippingAddresses.setOnCheckedChangeListener { _, checkedId ->
-            val shippingAddressChangeIntent =
-                Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)
-            shippingAddressChangeIntent.putExtra("callingBrowserPackage", callingPackage)
-            shippingAddressChangeIntent.putExtra(
-                "selectedAddress", addresses[checkedId]?.asBundle()
+    private fun bindPaymentDetailsUpdateService() {
+        val callingBrowserPackage = callingPackage ?: return
+        val intent = Intent("org.chromium.intent.action.UPDATE_PAYMENT_DETAILS")
+            .setPackage(callingBrowserPackage)
+        if (packageManager.resolveServiceByFilter(intent) == null) {
+            // Fallback to Chrome-only approach.
+            intent.setClassName(
+                callingBrowserPackage,
+                "org.chromium.components.payments.PaymentDetailsUpdateService"
             )
-            payButton.isEnabled = false
-            startActivityForResult(
-                shippingAddressChangeIntent, UPDATE_DETAILS_ACTIVITY_REQUEST_CODE
-            )
+            intent.action = IPaymentDetailsUpdateService::class.java.name
         }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        when (requestCode) {
-            UPDATE_DETAILS_ACTIVITY_REQUEST_CODE -> {
-                if (resultCode == Activity.RESULT_OK && data != null) {
-                    val updatedParams = data.extras?.getBundle("updatedPaymentParams")?.let {
-                        PaymentDetailsUpdate.from(it)
-                    }
-
-                    if (updatedParams?.shippingOptions != null) {
-                        paymentParams.shippingOptions = updatedParams.shippingOptions
-                        createShippingOptions()
-                        logIfDebug("New shipping options:\t" + "${paymentParams.shippingOptions}")
-                    }
-
-                    if (updatedParams?.total != null) {
-                        paymentParams.total = updatedParams.total
-                        logIfDebug("New total:\t" + "${paymentParams.total}")
-                    }
-
-                    if (updatedParams?.error != null) {
-                        errorMessage = updatedParams.error + "\n"
-                        logIfDebug("New error:\t" + updatedParams.error)
-                    }
-
-                    if (updatedParams?.addressErrors != null) {
-                        errorMessage += updatedParams.addressErrors.toString()
-                        logIfDebug(
-                            "New address errors:\t" + updatedParams.addressErrors.toString()
-                        )
-                    }
-
-                    if (updatedParams?.stringifiedPaymentMethodErrors != null) {
-                        promotionErrorMessage = updatedParams.stringifiedPaymentMethodErrors
-                        logIfDebug(
-                            "New payment method error:\t" + updatedParams.stringifiedPaymentMethodErrors
-                        )
-                    }
-
-                    viewModel.initialize(paymentParams, errorMessage, promotionErrorMessage)
-                }
-            }
-        }
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE)
     }
 
     private fun cancel() {
@@ -322,7 +258,31 @@ class PaymentActivity : AppCompatActivity() {
         setResult(RESULT_OK, Intent().apply {
             putExtra("methodName", BuildConfig.SAMPLE_PAY_METHOD_NAME)
             putExtra("details", "{\"token\": \"put-some-data-here\"}")
-            populateRequestedPaymentOptions()
+            val paymentOptions = viewModel.paymentOptions.value
+            if (paymentOptions == null) {
+                cancel()
+                return
+            }
+            if (paymentOptions.requestPayerName) {
+                putExtra("payerName", binding.payerName.text.toString())
+            }
+            if (paymentOptions.requestPayerPhone) {
+                putExtra("payerPhone", binding.payerPhone.text.toString())
+            }
+            if (paymentOptions.requestPayerEmail) {
+                putExtra("payerEmail", binding.payerEmail.text.toString())
+            }
+            if (paymentOptions.requestShipping) {
+                val addresses = viewModel.paymentAddresses.value!!
+                putExtra(
+                    "shippingAddress",
+                    addresses[binding.shippingAddresses.checkedRadioButtonId]?.asBundle()
+                )
+                val optionId = binding.shippingOptions.findViewById<RadioButton>(
+                    binding.shippingOptions.checkedRadioButtonId
+                ).tag as String
+                putExtra("shippingOptionId", optionId)
+            }
             if (BuildConfig.DEBUG) {
                 Log.d(getString(R.string.payment_response), "${this.extras}")
             }
@@ -330,46 +290,12 @@ class PaymentActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun Intent.populateRequestedPaymentOptions() {
-        if (paymentParams.paymentOptions.requestPayerName) {
-            val payerNameView = findViewById<EditText>(R.id.payer_name)
-            val payerName: String = payerNameView.text.toString()
-            putExtra("payerName", payerName)
-        }
-        if (paymentParams.paymentOptions.requestPayerPhone) {
-            val payerPhoneView = findViewById<EditText>(R.id.payer_phone)
-            val payerPhone: String = payerPhoneView.text.toString()
-            putExtra("payerPhone", payerPhone)
-        }
-        if (paymentParams.paymentOptions.requestPayerEmail) {
-            val payerEmailView = findViewById<EditText>(R.id.payer_email)
-            val payerEmail: String = payerEmailView.text.toString()
-            putExtra("payerEmail", payerEmail)
-        }
-        if (paymentParams.paymentOptions.requestShipping) {
-            putExtra(
-                "shippingAddress", addresses[shippingAddresses.checkedRadioButtonId]?.asBundle()
-            )
-            putExtra("shippingOptionId", selectedShippingOptionId)
-        }
-    }
-
-    private fun applyPromotion() {
-        promotionErrorMessage = ""
-        val promotionCode = findViewById<EditText>(R.id.promotion_code).text.toString()
-        val paymentMethodChangeIntent =
-            Intent(this@PaymentActivity, PaymentDetailsUpdateActivity::class.java)
-        paymentMethodChangeIntent.putExtra("callingBrowserPackage", callingPackage)
-        paymentMethodChangeIntent.putExtra("promotionCode", promotionCode)
-        payButton.isEnabled = false
-        startActivityForResult(
-            paymentMethodChangeIntent, UPDATE_DETAILS_ACTIVITY_REQUEST_CODE
+    private fun formatTitle(@StringRes id: Int, label: String): String {
+        return getString(
+            id,
+            label.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString()
+            }
         )
-    }
-
-    private fun logIfDebug(message: String) {
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, message)
-        }
     }
 }

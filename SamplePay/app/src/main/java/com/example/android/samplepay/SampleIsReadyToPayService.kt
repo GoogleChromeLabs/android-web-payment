@@ -37,7 +37,7 @@ class SampleIsReadyToPayService : Service() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
             try {
                 val callingPackage: String? = packageManager.getNameForUid(Binder.getCallingUid())
-                if (packageManager.authorizeCaller(callingPackage, application)) {
+                if (application.authorizeCaller(callingPackage)) {
                     Log.d(TAG, "The caller is Chrome")
                     callback?.handleIsReadyToPay(true)
                 } else {

@@ -17,8 +17,10 @@
 package com.example.android.samplepay
 
 import android.annotation.SuppressLint
-import android.content.Context
+import android.app.Application
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
 import android.os.Build
 import java.security.MessageDigest
 
@@ -61,16 +63,28 @@ fun PackageManager.hasSigningCertificates(
     }
 }
 
-fun PackageManager.authorizeCaller(packageName: String?, context: Context): Boolean {
-    return (packageName == "com.android.chrome" && hasSigningCertificates(
-        packageName, setOf(parseFingerprint(context.getString(R.string.chrome_stable_fingerprint)))
-    )) || (packageName == "com.chrome.beta" && hasSigningCertificates(
-        packageName, setOf(parseFingerprint(context.getString(R.string.chrome_beta_fingerprint)))
-    )) || (packageName == "com.chrome.dev" && hasSigningCertificates(
-        packageName, setOf(parseFingerprint(context.getString(R.string.chrome_dev_fingerprint)))
-    )) || (packageName == "com.chrome.canary" && hasSigningCertificates(
-        packageName, setOf(parseFingerprint(context.getString(R.string.chrome_canary_fingerprint)))
-    )) || (packageName == "org.chromium.chrome" && hasSigningCertificates(
-        packageName, setOf(parseFingerprint(context.getString(R.string.chromium_fingerprint)))
+fun Application.authorizeCaller(packageName: String?): Boolean {
+    return (packageName == "com.android.chrome" && packageManager.hasSigningCertificates(
+        packageName, setOf(parseFingerprint(getString(R.string.chrome_stable_fingerprint)))
+    )) || (packageName == "com.chrome.beta" && packageManager.hasSigningCertificates(
+        packageName, setOf(parseFingerprint(getString(R.string.chrome_beta_fingerprint)))
+    )) || (packageName == "com.chrome.dev" && packageManager.hasSigningCertificates(
+        packageName, setOf(parseFingerprint(getString(R.string.chrome_dev_fingerprint)))
+    )) || (packageName == "com.chrome.canary" && packageManager.hasSigningCertificates(
+        packageName, setOf(parseFingerprint(getString(R.string.chrome_canary_fingerprint)))
+    )) || (packageName == "org.chromium.chrome" && packageManager.hasSigningCertificates(
+        packageName, setOf(parseFingerprint(getString(R.string.chromium_fingerprint)))
     ))
+}
+
+fun PackageManager.resolveServiceByFilter(intent: Intent): ResolveInfo? {
+    return if (Build.VERSION.SDK_INT >= 33) {
+        resolveService(
+            intent,
+            PackageManager.ResolveInfoFlags.of(PackageManager.GET_RESOLVED_FILTER.toLong())
+        )
+    } else {
+        @Suppress("DEPRECATION")
+        resolveService(intent, PackageManager.GET_RESOLVED_FILTER)
+    }
 }

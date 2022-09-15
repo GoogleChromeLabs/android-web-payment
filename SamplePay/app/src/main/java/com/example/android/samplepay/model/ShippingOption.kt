@@ -21,8 +21,8 @@ import android.os.Bundle
 data class ShippingOption(
     val id: String,
     val label: String,
-    var amountCurrency: String,
-    var amountValue: String,
+    val amountCurrency: String,
+    val amountValue: String,
     val selected: Boolean
 ) {
     companion object {

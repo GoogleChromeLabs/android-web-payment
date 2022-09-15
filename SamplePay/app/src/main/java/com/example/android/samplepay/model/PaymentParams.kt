@@ -64,7 +64,7 @@ data class PaymentParams(
     /**
      * The total amount of the checkout.
      */
-    var total: PaymentAmount?,
+    val total: PaymentAmount?,
 
     /**
      * The output of JSON.stringify(details.modifiers), where details.modifiers contain only
@@ -87,7 +87,7 @@ data class PaymentParams(
     /*
      * Merchant specified shipping options; will be non-null whenever shipping is requested.
      */
-    var shippingOptions: List<ShippingOption>?
+    val shippingOptions: List<ShippingOption>
 ) {
     companion object {
         fun from(extras: Bundle): PaymentParams {

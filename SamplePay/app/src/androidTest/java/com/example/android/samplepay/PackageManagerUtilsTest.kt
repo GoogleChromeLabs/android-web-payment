@@ -32,13 +32,13 @@ class PackageManagerUtilsTest {
         assertThat(
             context.packageManager.hasSigningCertificates(
                 "com.android.chrome",
-                setOf(parseFingerprint(context.getString(R.string.chrome_release_fingerprint)))
+                setOf(parseFingerprint(context.getString(R.string.chrome_stable_fingerprint)))
             )
         ).isTrue()
         assertThat(
             context.packageManager.hasSigningCertificates(
                 "com.example.android.samplepay",
-                setOf(parseFingerprint(context.getString(R.string.chrome_release_fingerprint)))
+                setOf(parseFingerprint(context.getString(R.string.chrome_stable_fingerprint)))
             )
         ).isFalse()
     }
@@ -50,7 +50,7 @@ class PackageManagerUtilsTest {
             context.packageManager.hasSigningCertificates(
                 "com.android.chrome",
                 setOf(
-                    parseFingerprint(context.getString(R.string.chrome_release_fingerprint)),
+                    parseFingerprint(context.getString(R.string.chrome_stable_fingerprint)),
                     parseFingerprint("4C:FC:14:C6:97:DE:66:4E:66:97:50:C0:24:CE:5F:27:00:92:EE:F3:7F:18:B3:DA:77:66:84:CD:9D:E9:D2:CB")
                 )
             )

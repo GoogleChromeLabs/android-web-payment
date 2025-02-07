@@ -63,7 +63,7 @@
         </activity>
 
         <!--
-            The service should check the caller at runtime.
+            These services should check the caller at runtime.
         -->
         <service
             android:name=".SampleIsReadyToPayService"
@@ -72,6 +72,15 @@
             tools:ignore="ExportedService">
             <intent-filter>
                 <action android:name="org.chromium.intent.action.IS_READY_TO_PAY" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".SamplePaymentDetailsUpdateService"
+            android:enabled="true"
+            android:exported="true"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="org.chromium.intent.action.UPDATE_PAYMENT_DETAILS" />
             </intent-filter>
         </service>
 

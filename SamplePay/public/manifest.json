@@ -13,10 +13,6 @@
       "type": "image/png"
     }
   ],
-  "serviceworker": {
-    "src": "sw.js",
-    "use_cache": false
-  },
   "prefer_related_applications": true,
   "related_applications": [
     {

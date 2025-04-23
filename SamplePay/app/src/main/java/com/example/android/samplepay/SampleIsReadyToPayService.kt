@@ -37,11 +37,11 @@ class SampleIsReadyToPayService : Service() {
                 val callingPackage: String? = packageManager.getNameForUid(Binder.getCallingUid())
                 if (application.authorizeCaller(callingPackage)) {
                     Log.d(TAG, "The caller is Chrome")
-                    callback?.handleIsReadyToPay(true)
                 } else {
                     Log.d(TAG, "The caller is not Chrome")
-                    callback?.handleIsReadyToPay(false)
                 }
+                // Allow non-Chrome callers.
+                callback?.handleIsReadyToPay(true)
             } catch (e: RemoteException) {
                 // Ignore
             }

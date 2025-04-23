@@ -25,6 +25,17 @@
           "value": "A6:B6:55:A1:02:05:3A:E5:5D:4D:77:E2:31:2A:7C:81:7C:63:C4:AB:7C:26:BB:7C:12:BC:2C:D8:A0:BC:88:46"
         }
       ]
+    },
+    {
+      "platform": "play",
+      "id": "com.example.android.samplepay",
+      "min_version": "1",
+      "fingerprints": [
+        {
+          "type": "sha256_cert",
+          "value": "D7:C2:43:3F:D9:AD:70:8B:87:1B:3D:7C:A5:0C:B8:06:12:98:BB:52:2F:37:62:9A:FA:11:D8:B5:22:5B:74:6E"
+        }
+      ]
     }
   ]
 }

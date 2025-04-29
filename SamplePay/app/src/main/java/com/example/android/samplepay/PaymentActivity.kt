@@ -51,45 +51,16 @@ class PaymentActivity : AppCompatActivity(R.layout.payment_activity) {
     private val viewModel: PaymentViewModel by viewModels()
     private val binding by viewBindings(PaymentActivityBinding::bind)
 
-    private var paymentDetailsUpdateService: IPaymentDetailsUpdateService? = null
-
     private var shippingOptionsListenerEnabled = false
     private var shippingAddressListenerEnabled = false
-
-    private val serviceConnection = object : ServiceConnection {
-        override fun onServiceConnected(className: ComponentName, service: IBinder?) {
-            Log.d(TAG, "IPaymentDetailsUpdateService connected")
-            paymentDetailsUpdateService = IPaymentDetailsUpdateService.Stub.asInterface(service)
-        }
-
-        override fun onServiceDisconnected(className: ComponentName?) {
-            Log.d(TAG, "IPaymentDetailsUpdateService disconnected")
-            paymentDetailsUpdateService = null
-        }
-    }
-
-    private val callback = object : IPaymentDetailsUpdateServiceCallback.Stub() {
-        override fun paymentDetailsNotUpdated() {
-            Log.d("TAG", "Payment details did not change.")
-        }
-
-        override fun updateWith(newPaymentDetails: Bundle) {
-            val update = PaymentDetailsUpdate.from(newPaymentDetails)
-            runOnUiThread {
-                update.shippingOptions?.let { viewModel.updateShippingOptions(it) }
-                update.total?.let { viewModel.updateTotal(it) }
-                viewModel.updateError(update.error ?: "")
-                update.addressErrors?.let { viewModel.updateAddressErrors(it) }
-                viewModel.updatePromotionError(update.stringifiedPaymentMethodErrors ?: "")
-            }
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding.payment.layoutParams.width =
             (resources.displayMetrics.widthPixels * 0.90).roundToInt()
         setSupportActionBar(findViewById(R.id.toolbar))
+
+        SamplePaymentDetailsUpdateService.viewModel = viewModel;
 
         // Bind values from ViewModel to views.
         viewModel.merchantName.observe(this) { merchantName ->
@@ -181,7 +152,7 @@ class PaymentActivity : AppCompatActivity(R.layout.payment_activity) {
         // Handle UI events.
         binding.promotionButton.setOnClickListener {
             val promotionCode = binding.promotionCode.text.toString()
-            paymentDetailsUpdateService?.changePaymentMethod(
+            SamplePaymentDetailsUpdateService.connectedService?.changePaymentMethod(
                 Bundle().apply {
                     putString("methodName", BuildConfig.SAMPLE_PAY_METHOD_NAME)
                     putString("details", JSONObject().apply {
@@ -195,14 +166,14 @@ class PaymentActivity : AppCompatActivity(R.layout.payment_activity) {
             if (shippingOptionsListenerEnabled) {
                 group.findViewById<RadioButton>(checkedId)?.let { button ->
                     val shippingOptionId = button.tag as String
-                    paymentDetailsUpdateService?.changeShippingOption(shippingOptionId, callback)
+                    SamplePaymentDetailsUpdateService.connectedService?.changeShippingOption(shippingOptionId, callback)
                 }
             }
         }
         binding.shippingAddresses.setOnCheckedChangeListener { _, checkedId ->
             if (shippingAddressListenerEnabled) {
                 viewModel.paymentAddresses.value?.get(checkedId)?.let { address ->
-                    paymentDetailsUpdateService?.changeShippingAddress(address.asBundle(), callback)
+                    SamplePaymentDetailsUpdateService.connectedService?.changeShippingAddress(address.asBundle(), callback)
                 }
             }
         }
@@ -226,27 +197,11 @@ class PaymentActivity : AppCompatActivity(R.layout.payment_activity) {
 
     override fun onStart() {
         super.onStart()
-        bindPaymentDetailsUpdateService()
     }
 
     override fun onStop() {
         super.onStop()
         unbindService(serviceConnection)
-    }
-
-    private fun bindPaymentDetailsUpdateService() {
-        val callingBrowserPackage = callingPackage ?: return
-        val intent = Intent("org.chromium.intent.action.UPDATE_PAYMENT_DETAILS")
-            .setPackage(callingBrowserPackage)
-        if (packageManager.resolveServiceByFilter(intent) == null) {
-            // Fallback to Chrome-only approach.
-            intent.setClassName(
-                callingBrowserPackage,
-                "org.chromium.components.payments.PaymentDetailsUpdateService"
-            )
-            intent.action = IPaymentDetailsUpdateService::class.java.name
-        }
-        bindService(intent, serviceConnection, BIND_AUTO_CREATE)
     }
 
     private fun cancel() {

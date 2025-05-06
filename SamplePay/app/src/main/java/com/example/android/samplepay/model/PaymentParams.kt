@@ -110,11 +110,11 @@ data class PaymentParams(
             PaymentParams(
                 methodNames = state["methodNames"] ?: emptyList(),
                 methodData = state.getMethodData("methodData"),
-                merchantName = state["merchantName"] ?: "", // TODO Consider validation on emit/receipt
+                merchantName = state["merchantName"] ?: "",
                 topLevelOrigin = state["topLevelOrigin"] ?: "",
                 topLevelCertificateChain = state.getCertificateChain("topLevelCertificateChain"),
                 paymentRequestOrigin = state["paymentRequestOrigin"] ?: "",
-                total = state.get<String>("total")?.let(PaymentAmount::parse), // TODO CONSIDER VALIDATING ALL FIELDS BEFORE CREATING THIS OBJECT
+                total = state.get<String>("total")?.let(PaymentAmount::parse),
                 modifiers = state["modifiers"] ?: "[]",
                 paymentRequestId = state["paymentRequestId"] ?: "",
                 paymentOptions = PaymentOptions.from(state["paymentOptions"]),

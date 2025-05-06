@@ -36,11 +36,9 @@ class SampleIsReadyToPayService : Service() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
             try {
                 val callingPackage: String? = packageManager.getNameForUid(Binder.getCallingUid())
-                if (application.authorizeCaller(callingPackage)) {
-                    Log.d(TAG, "The caller is Chrome")
-                } else {
-                    Log.d(TAG, "The caller is not Chrome")
-                }
+                val callerIsAuthorized = application.authorizeCaller(callingPackage)
+                Log.d(TAG, "The caller is ${if (!callerIsAuthorized) "not" else ""} Chrome")
+
                 // Allow non-Chrome callers.
                 callback?.handleIsReadyToPay(true)
             } catch (e: RemoteException) {

@@ -26,8 +26,8 @@ import android.os.IBinder
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import com.example.android.samplepay.BuildConfig
-import com.example.android.samplepay.model.AddressErrors
 import com.example.android.samplepay.model.PaymentAddress
 import com.example.android.samplepay.model.PaymentAmount
 import com.example.android.samplepay.model.PaymentDetailsUpdate
@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.chromium.components.payments.IPaymentDetailsUpdateService
 import org.chromium.components.payments.IPaymentDetailsUpdateServiceCallback
 import org.json.JSONObject
@@ -61,6 +62,7 @@ class PaymentViewModel(application: Application, state: SavedStateHandle) :
         }
 
         override fun onServiceDisconnected(className: ComponentName?) {
+            paymentDetailsUpdateService = null
         }
     }
 
@@ -71,23 +73,26 @@ class PaymentViewModel(application: Application, state: SavedStateHandle) :
 
         override fun updateWith(newPaymentDetails: Bundle) {
             Log.d(TAG, "Payment details changed.")
-            if (_paymentOperation.value is PaymentOperation.Started) {
-                val updatedDetails = PaymentDetailsUpdate.from(newPaymentDetails)
-                _paymentOperation.update {
-                    (it as PaymentOperation.Started).copy(
-                        shippingOptions = updatedDetails.shippingOptions!!,
-                        amount = updatedDetails.total,
-                        promotionCodeErrorText = updatedDetails.stringifiedPaymentMethodErrors,
-                        errorText = updatedDetails.error?.let { e ->
-                            buildString {
-                                append(e)
-                                updatedDetails.addressErrors?.let { ae ->
-                                    appendLine()
-                                    append(ae.toString())
+
+            viewModelScope.launch {
+                if (_paymentOperation.value is PaymentOperation.Started) {
+                    val updatedDetails = PaymentDetailsUpdate.from(newPaymentDetails)
+                    _paymentOperation.update {
+                        (it as PaymentOperation.Started).copy(
+                            shippingOptions = updatedDetails.shippingOptions!!,
+                            amount = updatedDetails.total,
+                            promotionCodeErrorText = updatedDetails.stringifiedPaymentMethodErrors,
+                            errorText = updatedDetails.error?.let { e ->
+                                buildString {
+                                    append(e)
+                                    updatedDetails.addressErrors?.let { ae ->
+                                        appendLine()
+                                        append(ae.toString())
+                                    }
                                 }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }

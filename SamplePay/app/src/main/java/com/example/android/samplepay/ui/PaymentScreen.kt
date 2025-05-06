@@ -249,7 +249,7 @@ private fun PaymentSummary(
                 })
         }
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_medium)))
-        InfoText(message = stringResource(R.string.home_explanation))
+        InfoText(message = stringResource(R.string.payment_explanation))
         Spacer(modifier = Modifier.height(dimensionResource(R.dimen.spacing_small)))
         Button(
             onClick = {

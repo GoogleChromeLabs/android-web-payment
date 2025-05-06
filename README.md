@@ -11,7 +11,7 @@ This is an Android payment app sample that works with Web PaymentRequest API.
 
 ## Test the Android payment App
 
-1. Download and install app-debug.apk
+1. Build and run the Android app in the `SamplePay` folder using Android Studio (or other tools or IDEs using Gradle) or run the `app-debug.apk` file included in the repo.
 2. Open the Chrome browser and navigate to  https://sample-pay-ss.firebaseapp.com
 3. Click on "PAY" button.
 

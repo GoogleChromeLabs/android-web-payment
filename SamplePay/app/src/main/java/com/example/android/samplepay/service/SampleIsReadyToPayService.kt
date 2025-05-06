@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,23 @@
  * limitations under the License.
  */
 
-package com.example.android.samplepay
+package com.example.android.samplepay.service
 
 import android.app.Service
 import android.content.Intent
 import android.os.Binder
 import android.os.RemoteException
 import android.util.Log
+import com.example.android.samplepay.authorizeCaller
 import org.chromium.IsReadyToPayService
 import org.chromium.IsReadyToPayServiceCallback
-
-private const val TAG = "IsReadyToPayService"
 
 /**
  * This service handles the IS_READY_TO_PAY action from Chrome.
  */
 class SampleIsReadyToPayService : Service() {
+
+    private val TAG = "IsReadyToPayService"
 
     private val binder = object : IsReadyToPayService.Stub() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {

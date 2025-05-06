@@ -17,6 +17,7 @@
 package com.example.android.samplepay.model
 
 import android.os.Bundle
+import androidx.lifecycle.SavedStateHandle
 
 /**
  * Represents all the parameters passed to the activity for the PAY action.
@@ -64,6 +65,7 @@ data class PaymentParams(
     /**
      * The total amount of the checkout.
      */
+    // TODO Why is this optional
     val total: PaymentAmount?,
 
     /**
@@ -90,8 +92,7 @@ data class PaymentParams(
     val shippingOptions: List<ShippingOption>
 ) {
     companion object {
-        fun from(extras: Bundle): PaymentParams {
-            return PaymentParams(
+        fun from(extras: Bundle) = PaymentParams(
                 methodNames = extras.getStringArrayList("methodNames") ?: emptyList(),
                 methodData = extras.getMethodData("methodData"),
                 merchantName = extras.getString("merchantName", ""),
@@ -104,6 +105,20 @@ data class PaymentParams(
                 paymentOptions = PaymentOptions.from(extras.getBundle("paymentOptions")),
                 shippingOptions = extras.getShippingOptions("shippingOptions")
             )
-        }
+
+        fun from(state: SavedStateHandle) =
+            PaymentParams(
+                methodNames = state["methodNames"] ?: emptyList(),
+                methodData = state.getMethodData("methodData"),
+                merchantName = state["merchantName"] ?: "", // TODO Consider validation on emit/receipt
+                topLevelOrigin = state["topLevelOrigin"] ?: "",
+                topLevelCertificateChain = state.getCertificateChain("topLevelCertificateChain"),
+                paymentRequestOrigin = state["paymentRequestOrigin"] ?: "",
+                total = state.get<String>("total")?.let(PaymentAmount::parse), // TODO CONSIDER VALIDATING ALL FIELDS BEFORE CREATING THIS OBJECT
+                modifiers = state["modifiers"] ?: "[]",
+                paymentRequestId = state["paymentRequestId"] ?: "",
+                paymentOptions = PaymentOptions.from(state["paymentOptions"]),
+                shippingOptions = state.getShippingOptions("shippingOptions")
+            )
     }
 }

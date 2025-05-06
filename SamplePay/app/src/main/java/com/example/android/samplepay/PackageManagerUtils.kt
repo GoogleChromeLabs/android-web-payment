@@ -56,7 +56,7 @@ fun PackageManager.hasSigningCertificates(
         val sha256 = MessageDigest.getInstance("SHA-256")
 
         @Suppress("DEPRECATION")
-        val signatures = packageInfo.signatures.map { sha256.digest(it.toByteArray()) }
+        val signatures = packageInfo.signatures!!.map { sha256.digest(it.toByteArray()) }
         // All the certificates have to match in case the APK is signed with multiple keys.
         signatures.size == certificates.size &&
                 signatures.all { s -> certificates.any { it.contentEquals(s) } }

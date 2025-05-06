@@ -21,16 +21,20 @@ import org.json.JSONException
 import org.json.JSONObject
 
 data class PaymentAmount(
-    val currency: String,
-    val value: String
+    val currency: String, val value: String
 ) {
     companion object {
+        private val ISO_TO_SYMBOL_CURRENCY_MAP = mapOf(
+            "USD" to "$",
+            "CAD" to "$",
+            "EUR" to "€"
+        )
+
         fun parse(json: String): PaymentAmount {
             try {
                 val obj = JSONObject(json)
                 return PaymentAmount(
-                    obj.getString("currency"),
-                    obj.getString("value")
+                    obj.getString("currency").let(::isoCurrencyToSymbol), obj.getString("value")
                 )
             } catch (e: JSONException) {
                 throw RuntimeException("Cannot parse JSON", e)
@@ -39,9 +43,12 @@ data class PaymentAmount(
 
         fun from(extras: Bundle): PaymentAmount {
             return PaymentAmount(
-                currency = extras.getString("currency")!!,
+                currency = extras.getString("currency")?.let(::isoCurrencyToSymbol).orEmpty(),
                 value = extras.getString("value")!!
             )
         }
+
+        private fun isoCurrencyToSymbol(isoCurrency: String) =
+            ISO_TO_SYMBOL_CURRENCY_MAP[isoCurrency].orEmpty()
     }
 }

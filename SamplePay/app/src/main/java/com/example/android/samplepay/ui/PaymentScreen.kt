@@ -19,7 +19,6 @@ package com.example.android.samplepay.ui
 import android.content.res.Configuration
 import android.os.Parcelable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -54,17 +53,13 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -101,9 +96,7 @@ fun PaymentScreen(
     val (merchantName, merchantOrigin, errorText, promoCodeErrorText, amount, paymentOptions, shippingOptions, defaultShippingOptionId, paymentAddresses) = paymentStatus
     Surface {
         PaymentScaffold(
-            merchantName = merchantName,
-            merchantOrigin = merchantOrigin,
-            modifier = modifier
+            merchantName = merchantName, merchantOrigin = merchantOrigin, modifier = modifier
         ) { innerPadding ->
             PaymentSummary(
                 paymentOptions = paymentOptions,
@@ -304,8 +297,6 @@ private fun PaymentFormTextField(
     textStyle: TextStyle = LocalTextStyle.current,
     keyboardActions: KeyboardActions = KeyboardActions.Default
 ) {
-    val focusRequester = remember { FocusRequester() }
-
     TextField(
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
@@ -317,9 +308,7 @@ private fun PaymentFormTextField(
         leadingIcon = leadingIcon,
         textStyle = textStyle,
         onValueChange = onValueChange,
-        modifier = modifier
-            .focusRequester(focusRequester)
-            .height(54.dp),
+        modifier = modifier.height(54.dp),
         shape = RoundedCornerShape(16.dp),
         value = value.orEmpty(),
         keyboardOptions = KeyboardOptions(
@@ -329,9 +318,6 @@ private fun PaymentFormTextField(
         maxLines = 1,
         singleLine = true,
     )
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
 }
 
 @Composable

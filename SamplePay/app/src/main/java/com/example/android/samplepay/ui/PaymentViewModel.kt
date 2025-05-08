@@ -113,7 +113,7 @@ class PaymentViewModel(application: Application, state: SavedStateHandle) :
             _paymentOperation.update { PaymentOperation.NoPaymentInfo }
 
         } else {
-            val (_, _, merchantName, merchantOrigin, _, _, amount, _, _, paymentOptions, shippingOptions) = PaymentParams.from(
+            val (_, _, merchantName, merchantOrigin, _, amount, _, _, paymentOptions, shippingOptions) = PaymentParams.from(
                 state
             )
             _paymentOperation.update {

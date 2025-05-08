@@ -586,7 +586,7 @@ fun PreviewPaymentScreen() {
 }
 
 @Parcelize
-data class PaymentFormInfo internal constructor(
+data class PaymentFormInfo(
     val promotionCode: String? = null,
     val contactInfo: ContactInfo,
     val shippingOption: String? = null,

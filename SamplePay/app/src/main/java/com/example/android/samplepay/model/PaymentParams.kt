@@ -48,13 +48,6 @@ data class PaymentParams(
     val topLevelOrigin: String,
 
     /**
-     * The certificate chain of the top-level browsing context. Null for localhost and file on disk,
-     * which are both secure contexts without SSL certificates. The certificate chain is necessary
-     * because a payment app might have different trust requirements for websites.
-     */
-    val topLevelCertificateChain: List<ByteArray>,
-
-    /**
      * The schemeless origin of the iframe browsing context that invoked the `new
      * PaymentRequest(methodData, details, options)` constructor in Javascript. If the constructor
      * was invoked from the top-level context, then the value of this parameter equals the value of
@@ -65,7 +58,6 @@ data class PaymentParams(
     /**
      * The total amount of the checkout.
      */
-    // TODO Why is this optional
     val total: PaymentAmount?,
 
     /**
@@ -97,7 +89,6 @@ data class PaymentParams(
                 methodData = extras.getMethodData("methodData"),
                 merchantName = extras.getString("merchantName", ""),
                 topLevelOrigin = extras.getString("topLevelOrigin", ""),
-                topLevelCertificateChain = extras.getCertificateChain("topLevelCertificateChain"),
                 paymentRequestOrigin = extras.getString("paymentRequestOrigin", ""),
                 total = extras.getPaymentAmount("total"),
                 modifiers = extras.getString("modifiers", "[]"),
@@ -112,7 +103,6 @@ data class PaymentParams(
                 methodData = state.getMethodData("methodData"),
                 merchantName = state["merchantName"] ?: "",
                 topLevelOrigin = state["topLevelOrigin"] ?: "",
-                topLevelCertificateChain = state.getCertificateChain("topLevelCertificateChain"),
                 paymentRequestOrigin = state["paymentRequestOrigin"] ?: "",
                 total = state.get<String>("total")?.let(PaymentAmount::parse),
                 modifiers = state["modifiers"] ?: "[]",

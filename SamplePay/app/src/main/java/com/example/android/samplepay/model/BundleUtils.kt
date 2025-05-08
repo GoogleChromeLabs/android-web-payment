@@ -31,12 +31,6 @@ private fun Bundle.getBundleArray(key: String): Array<Bundle>? {
     }
 }
 
-internal fun Bundle.getCertificateChain(key: String): List<ByteArray> {
-    return getBundleArray(key)?.map {
-        it.getByteArray("certificate") ?: byteArrayOf()
-    } ?: emptyList()
-}
-
 internal fun Bundle.getPaymentAmount(key: String): PaymentAmount? {
     val s = getString(key)
     return if (s != null) {
@@ -63,12 +57,6 @@ internal fun Bundle.getMethodData(key: String): Map<String, String> {
 internal fun SavedStateHandle.getMethodData(key: String): Map<String, String> {
     val b = get<Bundle>(key)
     return b?.keySet()?.associateWith { b.getString(it, "[]") } ?: emptyMap()
-}
-
-internal fun SavedStateHandle.getCertificateChain(key: String): List<ByteArray> {
-    return get<List<Bundle>>(key)?.map {
-        it.getByteArray("certificate") ?: byteArrayOf()
-    } ?: emptyList()
 }
 
 internal fun SavedStateHandle.getShippingOptions(key: String): List<ShippingOption> {

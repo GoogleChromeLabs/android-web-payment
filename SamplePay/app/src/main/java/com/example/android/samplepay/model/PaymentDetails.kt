@@ -19,22 +19,18 @@ package com.example.android.samplepay.model
 import android.os.Bundle
 import org.json.JSONException
 import org.json.JSONObject
+import java.util.Currency
 
 data class PaymentAmount(
     val currency: String, val value: String
 ) {
     companion object {
-        private val ISO_TO_SYMBOL_CURRENCY_MAP = mapOf(
-            "USD" to "$",
-            "CAD" to "$",
-            "EUR" to "€"
-        )
-
         fun parse(json: String): PaymentAmount {
             try {
                 val obj = JSONObject(json)
+                val currencySymbol = Currency.getInstance(obj.getString("currency")).symbol
                 return PaymentAmount(
-                    obj.getString("currency").let(::isoCurrencyToSymbol), obj.getString("value")
+                    currencySymbol, obj.getString("value")
                 )
             } catch (e: JSONException) {
                 throw RuntimeException("Cannot parse JSON", e)
@@ -42,13 +38,11 @@ data class PaymentAmount(
         }
 
         fun from(extras: Bundle): PaymentAmount {
+            val currencySymbol =
+                extras.getString("currency")?.let { Currency.getInstance(it).symbol }.orEmpty()
             return PaymentAmount(
-                currency = extras.getString("currency")?.let(::isoCurrencyToSymbol).orEmpty(),
-                value = extras.getString("value")!!
+                currency = currencySymbol, value = extras.getString("value")!!
             )
         }
-
-        private fun isoCurrencyToSymbol(isoCurrency: String) =
-            ISO_TO_SYMBOL_CURRENCY_MAP[isoCurrency].orEmpty()
     }
 }

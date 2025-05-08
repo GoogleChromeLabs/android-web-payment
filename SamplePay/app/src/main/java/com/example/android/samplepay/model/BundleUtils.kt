@@ -18,6 +18,8 @@ package com.example.android.samplepay.model
 
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
+import androidx.lifecycle.SavedStateHandle
 import org.json.JSONException
 
 @Suppress("DEPRECATION", "UNCHECKED_CAST")
@@ -27,12 +29,6 @@ private fun Bundle.getBundleArray(key: String): Array<Bundle>? {
     } else {
         getParcelableArray(key) as Array<Bundle>?
     }
-}
-
-internal fun Bundle.getCertificateChain(key: String): List<ByteArray> {
-    return getBundleArray(key)?.map {
-        it.getByteArray("certificate") ?: byteArrayOf()
-    } ?: emptyList()
 }
 
 internal fun Bundle.getPaymentAmount(key: String): PaymentAmount? {
@@ -56,4 +52,13 @@ internal fun Bundle.getShippingOptions(key: String): List<ShippingOption> {
 internal fun Bundle.getMethodData(key: String): Map<String, String> {
     val b = getBundle(key) ?: return emptyMap()
     return b.keySet().associateWith { b.getString(it, "[]") }
+}
+
+internal fun SavedStateHandle.getMethodData(key: String): Map<String, String> {
+    val b = get<Bundle>(key)
+    return b?.keySet()?.associateWith { b.getString(it, "[]") } ?: emptyMap()
+}
+
+internal fun SavedStateHandle.getShippingOptions(key: String): List<ShippingOption> {
+    return get<Array<Parcelable>>(key)?.map { ShippingOption.from(it as Bundle) } ?: emptyList()
 }

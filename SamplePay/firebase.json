@@ -12,7 +12,7 @@
         "headers": [
           {
             "key": "Link",
-            "value": "<https://sample-pay-web-app.firebaseapp.com/payment-manifest.json>; rel=\"payment-method-manifest\""
+            "value": "<https://sample-pay-web-app.web.app/payment-manifest.json>; rel=\"payment-method-manifest\""
           }
         ]
       }

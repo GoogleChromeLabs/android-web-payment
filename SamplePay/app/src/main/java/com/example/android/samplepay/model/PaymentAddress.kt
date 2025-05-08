@@ -19,6 +19,8 @@ package com.example.android.samplepay.model
 import android.os.Bundle
 
 data class PaymentAddress(
+    val id: String,
+    val label: String,
     val addressLines: List<String>,
     val countryCode: String,
     val country: String,

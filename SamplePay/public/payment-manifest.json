@@ -1,8 +1,8 @@
 {
   "default_applications": [
-    "https://sample-pay-web-app.firebaseapp.com/manifest.json"
+    "https://sample-pay-web-app.web.app/manifest.json"
   ],
   "supported_origins": [
-    "https://sample-pay-web-app.firebaseapp.com"
+    "https://sample-pay-web-app.web.app"
   ]
 }

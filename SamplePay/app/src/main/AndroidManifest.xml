@@ -16,8 +16,7 @@
 -->
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.android.samplepay">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <queries>
         <package android:name="com.android.chrome" />
@@ -38,20 +37,13 @@
         tools:ignore="GoogleAppIndexingWarning">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <activity
-            android:name=".PaymentActivity"
-            android:exported="true"
-            android:theme="@style/Theme.SamplePay.Dialog">
-            <intent-filter>
                 <action android:name="org.chromium.intent.action.PAY" />
+                <action android:name="android.intent.action.VIEW" />
             </intent-filter>
 
             <meta-data
@@ -63,10 +55,10 @@
         </activity>
 
         <!--
-            The service should check the caller at runtime.
+            These services should check the caller at runtime.
         -->
         <service
-            android:name=".SampleIsReadyToPayService"
+            android:name=".service.SampleIsReadyToPayService"
             android:enabled="true"
             android:exported="true"
             tools:ignore="ExportedService">
@@ -74,7 +66,15 @@
                 <action android:name="org.chromium.intent.action.IS_READY_TO_PAY" />
             </intent-filter>
         </service>
+        <service
+            android:name=".service.SamplePaymentDetailsUpdateService"
+            android:enabled="true"
+            android:exported="true"
+            tools:ignore="ExportedService">
+            <intent-filter>
+                <action android:name="org.chromium.intent.action.UPDATE_PAYMENT_DETAILS" />
+            </intent-filter>
+        </service>
 
     </application>
-
 </manifest>

@@ -23,6 +23,9 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.android.samplepay.R
+import com.example.android.samplepay.util.overrideCloseTransition
+import com.example.android.samplepay.util.overrideOpenTransition
 
 class MainActivity : ComponentActivity() {
 
@@ -55,6 +58,16 @@ class MainActivity : ComponentActivity() {
                 else -> PaymentApp(paymentStatus = payStatus)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        overrideOpenTransition(R.anim.slide_from_bottom, R.anim.slide_to_bottom_20)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        overrideCloseTransition(R.anim.slide_from_bottom_20, R.anim.slide_to_bottom)
     }
 
     private fun cancel() {

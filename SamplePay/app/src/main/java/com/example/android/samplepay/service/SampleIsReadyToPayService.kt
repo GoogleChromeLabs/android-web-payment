@@ -18,10 +18,8 @@ package com.example.android.samplepay.service
 
 import android.app.Service
 import android.content.Intent
-import android.os.Binder
 import android.os.RemoteException
 import android.util.Log
-import com.example.android.samplepay.authorizeCaller
 import org.chromium.IsReadyToPayService
 import org.chromium.IsReadyToPayServiceCallback
 
@@ -35,13 +33,12 @@ class SampleIsReadyToPayService : Service() {
     private val binder = object : IsReadyToPayService.Stub() {
         override fun isReadyToPay(callback: IsReadyToPayServiceCallback?) {
             try {
-                val callingPackage: String? = packageManager.getNameForUid(Binder.getCallingUid())
-                val callerIsAuthorized = application.authorizeCaller(callingPackage)
-                Log.d(TAG, "The caller is ${if (!callerIsAuthorized) "not" else ""} Chrome")
+                val callingPackage: String? = packageManager.getNameForUid(getCallingUid())
+                Log.d(TAG, "The caller is $callingPackage")
 
                 // Allow non-Chrome callers.
                 callback?.handleIsReadyToPay(true)
-            } catch (e: RemoteException) {
+            } catch (_: RemoteException) {
                 // Ignore
             }
         }

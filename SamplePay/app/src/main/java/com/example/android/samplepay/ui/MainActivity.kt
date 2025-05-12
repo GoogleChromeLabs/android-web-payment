@@ -40,14 +40,6 @@ class MainActivity : ComponentActivity() {
             cancel()
         }
 
-        // TODO CHECK IF THIS AUTHORIZATION STILL NEEDS TO BE MADE (consider doing in activity)
-        /*
-        _error.value = if (application.authorizeCaller(callingPackage)) {
-            ""
-        } else {
-            application.getString(R.string.error_caller_not_chrome)
-        }*/
-
         setContent {
             val payStatus by viewModel.paymentOperation.collectAsStateWithLifecycle()
             when (payStatus) {

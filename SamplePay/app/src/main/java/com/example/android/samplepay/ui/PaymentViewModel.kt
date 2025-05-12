@@ -21,12 +21,19 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.Signature
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.android.samplepay.BuildConfig
 import com.example.android.samplepay.model.PaymentAddress
 import com.example.android.samplepay.model.PaymentAmount
@@ -35,6 +42,7 @@ import com.example.android.samplepay.model.PaymentOptions
 import com.example.android.samplepay.model.PaymentParams
 import com.example.android.samplepay.model.ShippingOption
 import com.example.android.samplepay.service.SamplePaymentDetailsUpdateService
+import com.example.android.samplepay.util.getApplicationSignatures
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,8 +54,28 @@ import org.json.JSONObject
 
 private const val TAG = "PaymentViewModel"
 
-class PaymentViewModel(application: Application, state: SavedStateHandle) :
-    AndroidViewModel(application) {
+class PaymentViewModel(
+    private val application: Application,
+    private val state: SavedStateHandle,
+    private val callingPackage: String?
+) : AndroidViewModel(application) {
+
+    // Define view model factory to include the calling package
+    companion object {
+        val CALLING_PACKAGE_KEY = object : CreationExtras.Key<String?> {}
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val application = this[APPLICATION_KEY] as Application
+                val callingPackage = this[CALLING_PACKAGE_KEY]
+                PaymentViewModel(
+                    application = application,
+                    state = createSavedStateHandle(),
+                    callingPackage = callingPackage
+                )
+            }
+        }
+    }
+
 
     private val _paymentOperation: MutableStateFlow<PaymentOperation> =
         MutableStateFlow(PaymentOperation.None)
@@ -109,15 +137,19 @@ class PaymentViewModel(application: Application, state: SavedStateHandle) :
         }
 
         // Analyze the contents of the intent and initiate the payment process
-        if(!state.contains("paymentOptions")) {
-            _paymentOperation.update { PaymentOperation.NoPaymentInfo }
-
-        } else {
+        if (callingPackage != null && state.contains("paymentOptions")) {
             val (_, _, merchantName, merchantOrigin, _, amount, _, _, paymentOptions, shippingOptions) = PaymentParams.from(
                 state
             )
-            _paymentOperation.update {
-                PaymentOperation.Started(
+
+            val callingIdentity = callingPackage.let {
+                val signatures = application.packageManager.getApplicationSignatures(it)
+                ApplicationIdentity(it, signatures)
+            }
+
+            _paymentIntent.update {
+                PaymentIntent.Started(
+                    callingIdentity = callingIdentity,
                     merchantName = merchantName,
                     merchantOrigin = merchantOrigin,
                     amount = amount,
@@ -189,14 +221,15 @@ class PaymentViewModel(application: Application, state: SavedStateHandle) :
 
     override fun onCleared() {
         if (paymentDetailsUpdateService != null) {
-            getApplication<Application>().applicationContext.unbindService(connection)
+            application.applicationContext.unbindService(connection)
         }
     }
 }
 
-abstract class PaymentOperation {
-    data object None : PaymentOperation()
+abstract class PaymentIntent {
+    data object None : PaymentIntent()
     data class Started(
+        val callingIdentity: ApplicationIdentity,
         val merchantName: String?,
         val merchantOrigin: String?,
         val errorText: String? = null,
@@ -211,6 +244,11 @@ abstract class PaymentOperation {
     data object NoPaymentInfo : PaymentOperation()
     data class ResultIntent(val intent: Intent) : PaymentOperation()
 }
+
+data class ApplicationIdentity(
+    val packageName: String,
+    val signatures: List<Signature>
+)
 
 val paymentAddresses: List<PaymentAddress> = listOf(
     PaymentAddress(

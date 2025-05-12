@@ -19,8 +19,11 @@ package com.example.android.samplepay.service
 import android.app.Service
 import android.content.Intent
 import android.os.Bundle
+import com.example.android.samplepay.ui.ApplicationIdentity
+import com.example.android.samplepay.util.getApplicationSignatures
 import org.chromium.components.payments.IPaymentDetailsUpdateService
 import org.chromium.components.payments.IPaymentDetailsUpdateServiceCallback
+
 
 /**
  * This service handles the UPDATE_PAYMENT_DETAILS service connection from Chrome.
@@ -33,6 +36,8 @@ class SamplePaymentDetailsUpdateService : Service() {
 
     inner class LocalBinder : IPaymentDetailsUpdateServiceCallback.Stub() {
 
+        private var remoteCallerIdentity: ApplicationIdentity? = null
+
         override fun updateWith(updatedPaymentDetails: Bundle?) {
             // No-op
         }
@@ -42,10 +47,24 @@ class SamplePaymentDetailsUpdateService : Service() {
         }
 
         override fun setPaymentDetailsUpdateService(service: IPaymentDetailsUpdateService) {
+            val callingAppId = packageManager.getNameForUid(getCallingUid())
+            remoteCallerIdentity = callingAppId?.let { appId ->
+                ApplicationIdentity(appId, packageManager.getApplicationSignatures(appId))
+            }
+
             updateService = service
         }
 
-        fun getUpdateService(): IPaymentDetailsUpdateService? = updateService
+        fun getUpdateService(appIdentity: ApplicationIdentity): IPaymentDetailsUpdateService? {
+            if (remoteCallerIdentity == appIdentity) {
+                return updateService
+            }
+
+            throw IllegalStateException("""
+                Multiple callers are attempting to interact with this payment application.
+                The identities of the application initiating the payment and receiving updates don't match.
+            """)
+        }
     }
 
     override fun onBind(intent: Intent?) = binder

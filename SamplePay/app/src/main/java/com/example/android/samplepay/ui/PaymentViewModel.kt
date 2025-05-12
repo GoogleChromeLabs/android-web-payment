@@ -76,17 +76,28 @@ class PaymentViewModel(
         }
     }
 
+    private val _paymentIntent: MutableStateFlow<PaymentIntent> =
+        MutableStateFlow(PaymentIntent.None)
+    val paymentIntent: StateFlow<PaymentIntent> = _paymentIntent.asStateFlow()
 
-    private val _paymentOperation: MutableStateFlow<PaymentOperation> =
-        MutableStateFlow(PaymentOperation.None)
-    val paymentOperation: StateFlow<PaymentOperation> = _paymentOperation.asStateFlow()
+    private val _paymentResult: MutableStateFlow<PaymentResult> =
+        MutableStateFlow(PaymentResult.None)
+    val paymentResult: StateFlow<PaymentResult> = _paymentResult.asStateFlow()
 
     private var paymentDetailsUpdateService: IPaymentDetailsUpdateService? = null
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            val binder = service as SamplePaymentDetailsUpdateService.LocalBinder
-            paymentDetailsUpdateService = binder.getUpdateService()
+            if (_paymentIntent.value is PaymentIntent.Started) {
+                val binder = service as SamplePaymentDetailsUpdateService.LocalBinder
+                try {
+                    paymentDetailsUpdateService =
+                        binder.getUpdateService((_paymentIntent.value as PaymentIntent.Started).callingIdentity)
+
+                } catch (ise: IllegalStateException) {
+                    _paymentResult.update { PaymentResult.Error(ise) }
+                }
+            }
         }
 
         override fun onServiceDisconnected(className: ComponentName?) {
@@ -103,10 +114,10 @@ class PaymentViewModel(
             Log.d(TAG, "Payment details changed.")
 
             viewModelScope.launch {
-                if (_paymentOperation.value is PaymentOperation.Started) {
+                if (_paymentIntent.value is PaymentIntent.Started) {
                     val updatedDetails = PaymentDetailsUpdate.from(newPaymentDetails)
-                    _paymentOperation.update {
-                        (it as PaymentOperation.Started).copy(
+                    _paymentIntent.update {
+                        (it as PaymentIntent.Started).copy(
                             shippingOptions = updatedDetails.shippingOptions!!,
                             amount = updatedDetails.total,
                             promotionCodeErrorText = updatedDetails.stringifiedPaymentMethodErrors,
@@ -131,11 +142,6 @@ class PaymentViewModel(
     }
 
     init {
-        // Start service to listen to payment update changes
-        Intent(application, SamplePaymentDetailsUpdateService::class.java).also { intent ->
-            application.bindService(intent, connection, Context.BIND_AUTO_CREATE)
-        }
-
         // Analyze the contents of the intent and initiate the payment process
         if (callingPackage != null && state.contains("paymentOptions")) {
             val (_, _, merchantName, merchantOrigin, _, amount, _, _, paymentOptions, shippingOptions) = PaymentParams.from(
@@ -160,6 +166,11 @@ class PaymentViewModel(
                 )
             }
         }
+
+        // Start service to listen to payment update changes
+        Intent(application, SamplePaymentDetailsUpdateService::class.java).also { intent ->
+            application.bindService(intent, connection, Context.BIND_AUTO_CREATE)
+        }
     }
 
     fun applyPromotionCode(promotionCode: String) {
@@ -183,10 +194,10 @@ class PaymentViewModel(
     }
 
     fun pay(paymentInfo: PaymentFormInfo) {
-        val paymentOptions = (_paymentOperation.value as PaymentOperation.Started).paymentOptions
+        val paymentOptions = (_paymentIntent.value as PaymentIntent.Started).paymentOptions
 
-        _paymentOperation.update {
-            PaymentOperation.ResultIntent(Intent().apply {
+        _paymentResult.update {
+            PaymentResult.ResultIntent(Intent().apply {
                 putExtra("methodName", BuildConfig.SAMPLE_PAY_METHOD_NAME)
                 putExtra("details", "{\"token\": \"put-some-data-here\"}")
 
@@ -239,10 +250,13 @@ abstract class PaymentIntent {
         val shippingOptions: List<ShippingOption>,
         val defaultShippingOptionId: String?,
         val paymentAddresses: List<PaymentAddress>
-    ) : PaymentOperation()
+    ) : PaymentIntent()
+}
 
-    data object NoPaymentInfo : PaymentOperation()
-    data class ResultIntent(val intent: Intent) : PaymentOperation()
+sealed class PaymentResult {
+    data object None : PaymentResult()
+    data class Error(val exception: Exception) : PaymentResult()
+    data class ResultIntent(val intent: Intent) : PaymentResult()
 }
 
 data class ApplicationIdentity(

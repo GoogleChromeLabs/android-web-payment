@@ -22,14 +22,23 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.example.android.samplepay.R
 import com.example.android.samplepay.util.overrideCloseTransition
 import com.example.android.samplepay.util.overrideOpenTransition
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: PaymentViewModel by viewModels()
+    private val viewModel: PaymentViewModel by viewModels(
+        factoryProducer = { PaymentViewModel.Factory },
+        extrasProducer = {
+            MutableCreationExtras(defaultViewModelCreationExtras).apply {
+                    set(PaymentViewModel.CALLING_PACKAGE_KEY, callingPackage)
+                }
+        })
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -41,13 +50,32 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            val payStatus by viewModel.paymentOperation.collectAsStateWithLifecycle()
-            when (payStatus) {
-                is PaymentOperation.ResultIntent -> {
-                    setResult(RESULT_OK, (payStatus as PaymentOperation.ResultIntent).intent)
+            val payIntent by viewModel.paymentIntent.collectAsStateWithLifecycle()
+            val payResult by viewModel.paymentResult.collectAsStateWithLifecycle()
+            val openErrorDialog = rememberSaveable { mutableStateOf(false) }
+
+            PaymentApp(
+                payIntent = payIntent,
+                openErrorDialog = openErrorDialog.value,
+                onErrorDismissed = {
+                    openErrorDialog.value = false
+                    cancel()
+                },
+                onAddPromoCode = viewModel::applyPromotionCode,
+                onShippingOptionChange = viewModel::updateShippingOption,
+                onShippingAddressChange = viewModel::updateShippingAddress,
+                onPayButtonClicked = viewModel::pay
+            )
+
+            when (payResult) {
+                PaymentResult.None -> {}
+                is PaymentResult.ResultIntent -> {
+                    setResult(RESULT_OK, (payResult as PaymentResult.ResultIntent).intent)
                     finish()
                 }
-                else -> PaymentApp(paymentStatus = payStatus)
+                is PaymentResult.Error -> {
+                    openErrorDialog.value = true
+                }
             }
         }
     }

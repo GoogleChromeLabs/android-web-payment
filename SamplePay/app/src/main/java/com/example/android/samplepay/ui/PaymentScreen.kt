@@ -86,14 +86,14 @@ import kotlinx.parcelize.Parcelize
 
 @Composable
 fun PaymentScreen(
-    paymentStatus: PaymentOperation.Started,
+    payIntent: PaymentIntent.Started,
     onAddPromoCode: (String) -> Unit,
     onShippingOptionChange: (String) -> Unit,
     onShippingAddressChange: (String) -> Unit,
     onPayButtonClicked: (PaymentFormInfo) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val (merchantName, merchantOrigin, errorText, promoCodeErrorText, amount, paymentOptions, shippingOptions, defaultShippingOptionId, paymentAddresses) = paymentStatus
+    val (_, merchantName, merchantOrigin, errorText, promoCodeErrorText, amount, paymentOptions, shippingOptions, defaultShippingOptionId, paymentAddresses) = payIntent
     Surface {
         PaymentScaffold(
             merchantName = merchantName, merchantOrigin = merchantOrigin, modifier = modifier

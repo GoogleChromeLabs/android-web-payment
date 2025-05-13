@@ -31,18 +31,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.android.samplepay.R
 import com.example.android.samplepay.ui.theme.AppTheme
-import kotlinx.serialization.Serializable
-
-@Serializable
-object Default
-
-@Serializable
-object Payment
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -56,15 +46,11 @@ fun PaymentApp(
     onPayButtonClicked: (PaymentFormInfo) -> Unit
 ) {
     AppTheme {
-        val navController = rememberNavController()
-        NavHost(
-            navController = navController,
-            startDestination = if (payIntent is PaymentIntent.None) Default else Payment
-        ) {
-            composable<Default> { DefaultScreen() }
-            composable<Payment> {
+        when (payIntent) {
+            is PaymentIntent.None -> DefaultScreen()
+            is PaymentIntent.Started -> {
                 PaymentScreen(
-                    payIntent = payIntent as PaymentIntent.Started,
+                    payIntent = payIntent,
                     onAddPromoCode = onAddPromoCode,
                     onShippingOptionChange = onShippingOptionChange,
                     onShippingAddressChange = onShippingAddressChange,
@@ -103,20 +89,14 @@ fun DefaultScreen(modifier: Modifier = Modifier) {
 @Composable
 fun SecurityErrorDialog(openDialog: Boolean, onDismissed: () -> Unit) {
     if (openDialog) {
-        AlertDialog(
-            title = {
-                Text(text = "Security error")
-            },
-            text = {
-                Text(text = "This payment app is being called by multiple applications, which is not supported by this provider.")
-            },
-            onDismissRequest = onDismissed,
-            dismissButton = {
-                TextButton(onClick = onDismissed) {
-                    Text("Dismiss")
-                }
-            },
-            confirmButton = {}
-        )
+        AlertDialog(title = {
+            Text(text = "Security error")
+        }, text = {
+            Text(text = "This payment app is being called by multiple applications, which is not supported by this provider.")
+        }, onDismissRequest = onDismissed, dismissButton = {
+            TextButton(onClick = onDismissed) {
+                Text("Dismiss")
+            }
+        }, confirmButton = {})
     }
 }

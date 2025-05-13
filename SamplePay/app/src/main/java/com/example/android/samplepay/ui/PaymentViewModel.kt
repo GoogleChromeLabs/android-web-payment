@@ -25,8 +25,8 @@ import android.content.pm.Signature
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.createSavedStateHandle
@@ -58,7 +58,7 @@ class PaymentViewModel(
     private val application: Application,
     private val state: SavedStateHandle,
     private val callingPackage: String?
-) : AndroidViewModel(application) {
+) : ViewModel() {
 
     // Define view model factory to include the calling package
     companion object {
@@ -88,11 +88,12 @@ class PaymentViewModel(
 
     private val connection = object : ServiceConnection {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
-            if (_paymentIntent.value is PaymentIntent.Started) {
+            val payIntentInfo = paymentIntent.value
+            if (payIntentInfo is PaymentIntent.Started) {
                 val binder = service as SamplePaymentDetailsUpdateService.LocalBinder
                 try {
                     paymentDetailsUpdateService =
-                        binder.getUpdateService((_paymentIntent.value as PaymentIntent.Started).callingIdentity)
+                        binder.getUpdateService(payIntentInfo.callingIdentity)
 
                 } catch (ise: IllegalStateException) {
                     _paymentResult.update { PaymentResult.Error(ise) }
@@ -114,7 +115,7 @@ class PaymentViewModel(
             Log.d(TAG, "Payment details changed.")
 
             viewModelScope.launch {
-                if (_paymentIntent.value is PaymentIntent.Started) {
+                if (paymentIntent.value is PaymentIntent.Started) {
                     val updatedDetails = PaymentDetailsUpdate.from(newPaymentDetails)
                     _paymentIntent.update {
                         (it as PaymentIntent.Started).copy(
@@ -129,8 +130,7 @@ class PaymentViewModel(
                                         append(ae.toString())
                                     }
                                 }
-                            }
-                        )
+                            })
                     }
                 }
             }
@@ -153,18 +153,16 @@ class PaymentViewModel(
                 ApplicationIdentity(it, signatures)
             }
 
-            _paymentIntent.update {
-                PaymentIntent.Started(
-                    callingIdentity = callingIdentity,
-                    merchantName = merchantName,
-                    merchantOrigin = merchantOrigin,
-                    amount = amount,
-                    paymentOptions = paymentOptions,
-                    shippingOptions = shippingOptions,
-                    defaultShippingOptionId = shippingOptions.find { it.selected }?.id,
-                    paymentAddresses = paymentAddresses,
-                )
-            }
+            _paymentIntent.value = PaymentIntent.Started(
+                callingIdentity = callingIdentity,
+                merchantName = merchantName,
+                merchantOrigin = merchantOrigin,
+                amount = amount,
+                paymentOptions = paymentOptions,
+                shippingOptions = shippingOptions,
+                defaultShippingOptionId = shippingOptions.find { it.selected }?.id,
+                paymentAddresses = paymentAddresses,
+            )
         }
 
         // Start service to listen to payment update changes
@@ -260,8 +258,7 @@ sealed class PaymentResult {
 }
 
 data class ApplicationIdentity(
-    val packageName: String,
-    val signatures: List<Signature>
+    val packageName: String, val signatures: List<Signature>
 )
 
 val paymentAddresses: List<PaymentAddress> = listOf(

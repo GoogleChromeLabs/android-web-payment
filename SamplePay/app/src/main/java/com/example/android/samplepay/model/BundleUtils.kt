@@ -46,7 +46,7 @@ internal fun Bundle.getPaymentAmount(key: String): PaymentAmount? {
 }
 
 internal fun Bundle.getShippingOptions(key: String): List<ShippingOption> {
-    return getBundleArray(key)?.map { ShippingOption.from(it) } ?: emptyList()
+    return getBundleArray(key)?.map(ShippingOption::from) ?: emptyList()
 }
 
 internal fun Bundle.getMethodData(key: String): Map<String, String> {

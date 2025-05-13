@@ -31,8 +31,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AddCircle
@@ -76,6 +78,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.android.samplepay.R
 import com.example.android.samplepay.model.PaymentAddress
 import com.example.android.samplepay.model.PaymentAmount
@@ -271,8 +274,14 @@ private fun AmountLabel(currency: String, value: String, modifier: Modifier = Mo
         horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.fillMaxWidth()
     ) {
         Text(text = "Total price:", style = Typography.labelLarge)
-        Text(
+        BasicText(
             text = stringResource(R.string.amount_label, currency, value),
+            maxLines = 1,
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 45.sp,
+                maxFontSize = 95.sp,
+                stepSize = 5.sp
+            ),
             style = Typography.displayLarge.copy(
                 brush = Brush.linearGradient(
                     colors = listOf(

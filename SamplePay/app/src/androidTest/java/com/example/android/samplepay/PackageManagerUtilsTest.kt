@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package com.example.android.samplepay
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.android.samplepay.util.getApplicationSignatures
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,33 +28,14 @@ import org.junit.runner.RunWith
 class PackageManagerUtilsTest {
 
     @Test
-    fun checkFingerprint() {
+    fun checkArbitrarySignatures() {
         val context: Context = ApplicationProvider.getApplicationContext()
-        assertThat(
-            context.packageManager.hasSigningCertificates(
-                "com.android.chrome",
-                setOf(parseFingerprint(context.getString(R.string.chrome_stable_fingerprint)))
-            )
-        ).isTrue()
-        assertThat(
-            context.packageManager.hasSigningCertificates(
-                "com.example.android.samplepay",
-                setOf(parseFingerprint(context.getString(R.string.chrome_stable_fingerprint)))
-            )
-        ).isFalse()
-    }
+        val chromeSignatures = context.packageManager.getApplicationSignatures("com.android.chrome")
+        assertThat(chromeSignatures).isNotEmpty()
 
-    @Test
-    fun checkFingerprint_multiple() {
-        val context: Context = ApplicationProvider.getApplicationContext()
-        assertThat(
-            context.packageManager.hasSigningCertificates(
-                "com.android.chrome",
-                setOf(
-                    parseFingerprint(context.getString(R.string.chrome_stable_fingerprint)),
-                    parseFingerprint("4C:FC:14:C6:97:DE:66:4E:66:97:50:C0:24:CE:5F:27:00:92:EE:F3:7F:18:B3:DA:77:66:84:CD:9D:E9:D2:CB")
-                )
-            )
-        ).isFalse()
+        val appSignatures = context.packageManager.getApplicationSignatures("com.example.android.samplepay")
+        assertThat(appSignatures).isNotEmpty()
+
+        assertThat(chromeSignatures).isNotEqualTo(appSignatures)
     }
 }

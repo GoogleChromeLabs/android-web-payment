@@ -57,7 +57,10 @@ private const val TAG = "PaymentViewModel"
 class PaymentViewModel(
     private val application: Application,
     private val state: SavedStateHandle,
+
+    /** The package that started the payment operation. */
     private val callingPackage: String?
+
 ) : ViewModel() {
 
     // Define view model factory to include the calling package
@@ -84,6 +87,10 @@ class PaymentViewModel(
         MutableStateFlow(PaymentResult.None)
     val paymentResult: StateFlow<PaymentResult> = _paymentResult.asStateFlow()
 
+    /**
+     * The remote service created on the Web end to issue updates to the payment metadata based on
+     * changes in the payment app.
+     * */
     private var paymentDetailsUpdateService: IPaymentDetailsUpdateService? = null
 
     private val connection = object : ServiceConnection {
@@ -114,6 +121,7 @@ class PaymentViewModel(
         override fun updateWith(newPaymentDetails: Bundle) {
             Log.d(TAG, "Payment details changed.")
 
+            // Create an object with conditional updates received from the remote checkout form.
             viewModelScope.launch {
                 if (paymentIntent.value is PaymentIntent.Started) {
                     val updatedDetails = PaymentDetailsUpdate.from(newPaymentDetails)
@@ -121,7 +129,7 @@ class PaymentViewModel(
                         (it as PaymentIntent.Started).copy(
                             shippingOptions = updatedDetails.shippingOptions!!,
                             amount = updatedDetails.total,
-                            promotionCodeErrorText = updatedDetails.stringifiedPaymentMethodErrors,
+                            promotionCodeErrorText = updatedDetails.paymentMethodErrors,
                             errorText = updatedDetails.error?.let { e ->
                                 buildString {
                                     append(e)
@@ -171,6 +179,12 @@ class PaymentViewModel(
         }
     }
 
+    /**
+     * Creates a bundle with a promotion code to send it back to the Web caller via the remote
+     * service, if available.
+     *
+     * @param promotionCode the code identifying the promotion applied
+     */
     fun applyPromotionCode(promotionCode: String) {
         val bundle = Bundle().apply {
             putString("methodName", BuildConfig.SAMPLE_PAY_METHOD_NAME)
@@ -181,16 +195,32 @@ class PaymentViewModel(
         paymentDetailsUpdateService?.changePaymentMethod(bundle, updatePaymentCallback)
     }
 
+    /**
+     * Reports shipping option changes back to the Web caller via the remote service, if available.
+     *
+     * @param shippingOptionId the identifier for the shipping option selected by the user
+     */
     fun updateShippingOption(shippingOptionId: String) {
         paymentDetailsUpdateService?.changeShippingOption(shippingOptionId, updatePaymentCallback)
     }
 
+    /**
+     * Reports shipping address changes back to the Web caller via the remote service, if available.
+     *
+     * @param shippingAddressId the identifier for the shipping address selected by the user
+     */
     fun updateShippingAddress(shippingAddressId: String) {
         paymentDetailsUpdateService?.changeShippingAddress(
             paymentAddresses.find { it.id == shippingAddressId }!!.asBundle(), updatePaymentCallback
         )
     }
 
+    /**
+     * Creates a result intent with the payment configuration based on the choices made on screen
+     * by the user and issues a state update with it.
+     *
+     * @param paymentInfo a collection with the payment choices made by the user
+     */
     fun pay(paymentInfo: PaymentFormInfo) {
         val paymentOptions = (_paymentIntent.value as PaymentIntent.Started).paymentOptions
 
@@ -220,10 +250,6 @@ class PaymentViewModel(
                 }
 
                 putExtra("promoCode", paymentInfo.promotionCode)
-
-                if (BuildConfig.DEBUG) {
-                    Log.d(TAG, extras.toString())
-                }
             })
         }
     }
@@ -235,6 +261,11 @@ class PaymentViewModel(
     }
 }
 
+/**
+ * A representation of the action processed by the application. When a payment intent is received
+ * from the remote caller, the [PaymentIntent.Started] type collects the incoming information to
+ * initiate the payment process.
+ */
 abstract class PaymentIntent {
     data object None : PaymentIntent()
     data class Started(
@@ -251,12 +282,14 @@ abstract class PaymentIntent {
     ) : PaymentIntent()
 }
 
+/** A representation of the result of the payment operation. */
 sealed class PaymentResult {
     data object None : PaymentResult()
     data class Error(val exception: Exception) : PaymentResult()
     data class ResultIntent(val intent: Intent) : PaymentResult()
 }
 
+/** A collection of data that determines the identity of an application. */
 data class ApplicationIdentity(
     val packageName: String, val signatures: List<Signature>
 )

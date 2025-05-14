@@ -25,17 +25,24 @@ import org.chromium.components.payments.IPaymentDetailsUpdateService
 import org.chromium.components.payments.IPaymentDetailsUpdateServiceCallback
 
 
-/**
- * This service handles the UPDATE_PAYMENT_DETAILS service connection from Chrome.
- */
+/** A service to handle the UPDATE_PAYMENT_DETAILS service connection from Chrome. */
 class SamplePaymentDetailsUpdateService : Service() {
 
+    /**
+     * The service received from the caller to send payment updates back and update the
+     * original checkout flow.
+     */
     private var updateService: IPaymentDetailsUpdateService? = null
 
+    /** A local binder to connect from the payment application and fetch the remote service. */
     private val binder = LocalBinder()
 
     inner class LocalBinder : IPaymentDetailsUpdateServiceCallback.Stub() {
 
+        /**
+         * The identity of the remote caller is registered at creation time, and verified against
+         * identity of the Web application initiating the payment process.
+         */
         private var remoteCallerIdentity: ApplicationIdentity? = null
 
         override fun updateWith(updatedPaymentDetails: Bundle?) {
@@ -55,15 +62,26 @@ class SamplePaymentDetailsUpdateService : Service() {
             updateService = service
         }
 
+        /**
+         * Retrieves the remote service so that the local payment app can use it as a channel to
+         * report checkout changes in the Web application.
+         *
+         * @param appIdentity the identity that initiated the payment process.
+         * @return the remote service to send updates back to the Web application.
+         * @throws IllegalStateException if the identity that initiated the payment and delivered
+         *     the service don't match.
+         */
         fun getUpdateService(appIdentity: ApplicationIdentity): IPaymentDetailsUpdateService? {
             if (remoteCallerIdentity == appIdentity) {
                 return updateService
             }
 
             throw IllegalStateException("""
-                Multiple callers are attempting to interact with this payment application.
-                The identities of the application initiating the payment and receiving updates don't match.
-            """)
+                |Multiple callers are attempting to interact with this payment application.
+                |The identities of the application initiating the payment and receiving updates
+                |don't match.
+            """.trimMargin()
+            )
         }
     }
 

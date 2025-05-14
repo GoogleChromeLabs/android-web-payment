@@ -32,9 +32,7 @@ fun ComponentActivity.overrideOpenTransition(enterAnim: Int, exitAnim: Int) =
 fun ComponentActivity.overrideCloseTransition(enterAnim: Int, exitAnim: Int) =
     overrideTransition(OVERRIDE_TRANSITION_CLOSE, enterAnim, exitAnim)
 
-/**
- * Decides what flavor of `overrideTransition` to use based on the API version.
- */
+/** Decides the signature of `overrideTransition` to use based on the API version. */
 private fun ComponentActivity.overrideTransition(overrideType: Int, enterAnim: Int, exitAnim: Int) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
         overrideActivityTransition(overrideType, enterAnim, exitAnim)

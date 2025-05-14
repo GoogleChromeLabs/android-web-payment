@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,12 +73,12 @@ data class PaymentParams(
      */
     val paymentRequestId: String,
 
-    /*
+    /**
      * The additional information requested by the merchant.
      */
     val paymentOptions: PaymentOptions,
 
-    /*
+    /**
      * Merchant specified shipping options; will be non-null whenever shipping is requested.
      */
     val shippingOptions: List<ShippingOption>

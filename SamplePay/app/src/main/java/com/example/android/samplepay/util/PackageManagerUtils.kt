@@ -20,10 +20,16 @@ import android.content.pm.PackageManager
 import android.content.pm.Signature
 import android.os.Build
 
+/**
+ * Collects a list of signatures for a given package name based on the API version.
+ *
+ *  @param packageName the name of the package to gather signatures for.
+ */
 fun PackageManager.getApplicationSignatures(packageName: String): List<Signature> {
     try {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val signingInfo = getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES).signingInfo
+            val signingInfo =
+                getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES).signingInfo
             signingInfo?.let {
                 if (it.hasMultipleSigners()) {
                     it.apkContentsSigners.toList()
@@ -32,8 +38,8 @@ fun PackageManager.getApplicationSignatures(packageName: String): List<Signature
                 }
             }.orEmpty()
         } else {
-            @Suppress("DEPRECATION")
-            val signatures = getPackageInfo(packageName, PackageManager.GET_SIGNATURES).signatures
+            @Suppress("DEPRECATION") val signatures =
+                getPackageInfo(packageName, PackageManager.GET_SIGNATURES).signatures
             signatures?.toList().orEmpty()
         }
     } catch (_: Exception) {

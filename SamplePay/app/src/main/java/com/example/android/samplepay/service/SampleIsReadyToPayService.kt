@@ -23,9 +23,7 @@ import android.util.Log
 import org.chromium.IsReadyToPayService
 import org.chromium.IsReadyToPayServiceCallback
 
-/**
- * This service handles the IS_READY_TO_PAY action from Chrome.
- */
+/** This service handles the IS_READY_TO_PAY action from Chrome. */
 class SampleIsReadyToPayService : Service() {
 
     private val TAG = "IsReadyToPayService"

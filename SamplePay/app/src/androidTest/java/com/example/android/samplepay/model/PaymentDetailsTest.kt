@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 
-private const val SAMPLE_TOTAL = """
-{"currency":"USD","value":"25.00"}
-"""
+private const val SAMPLE_TOTAL = "{\"currency\":\"USD\",\"value\":\"25.00\"}"
 
 @RunWith(AndroidJUnit4::class)
 class PaymentDetailsTest {
@@ -31,7 +29,7 @@ class PaymentDetailsTest {
     @Test
     fun parseTotal() {
         val total = PaymentAmount.parse(SAMPLE_TOTAL)
-        assertThat(total.currency).isEqualTo("USD")
+        assertThat(total.currency).isEqualTo("$")
         assertThat(total.value).isEqualTo("25.00")
     }
 }

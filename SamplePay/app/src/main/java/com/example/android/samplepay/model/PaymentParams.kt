@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Google LLC
+ * Copyright 2025 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package com.example.android.samplepay.model
 
 import android.os.Bundle
+import androidx.lifecycle.SavedStateHandle
 
 /**
  * Represents all the parameters passed to the activity for the PAY action.
@@ -47,13 +48,6 @@ data class PaymentParams(
     val topLevelOrigin: String,
 
     /**
-     * The certificate chain of the top-level browsing context. Null for localhost and file on disk,
-     * which are both secure contexts without SSL certificates. The certificate chain is necessary
-     * because a payment app might have different trust requirements for websites.
-     */
-    val topLevelCertificateChain: List<ByteArray>,
-
-    /**
      * The schemeless origin of the iframe browsing context that invoked the `new
      * PaymentRequest(methodData, details, options)` constructor in Javascript. If the constructor
      * was invoked from the top-level context, then the value of this parameter equals the value of
@@ -79,24 +73,22 @@ data class PaymentParams(
      */
     val paymentRequestId: String,
 
-    /*
+    /**
      * The additional information requested by the merchant.
      */
     val paymentOptions: PaymentOptions,
 
-    /*
+    /**
      * Merchant specified shipping options; will be non-null whenever shipping is requested.
      */
     val shippingOptions: List<ShippingOption>
 ) {
     companion object {
-        fun from(extras: Bundle): PaymentParams {
-            return PaymentParams(
+        fun from(extras: Bundle) = PaymentParams(
                 methodNames = extras.getStringArrayList("methodNames") ?: emptyList(),
                 methodData = extras.getMethodData("methodData"),
                 merchantName = extras.getString("merchantName", ""),
                 topLevelOrigin = extras.getString("topLevelOrigin", ""),
-                topLevelCertificateChain = extras.getCertificateChain("topLevelCertificateChain"),
                 paymentRequestOrigin = extras.getString("paymentRequestOrigin", ""),
                 total = extras.getPaymentAmount("total"),
                 modifiers = extras.getString("modifiers", "[]"),
@@ -104,6 +96,19 @@ data class PaymentParams(
                 paymentOptions = PaymentOptions.from(extras.getBundle("paymentOptions")),
                 shippingOptions = extras.getShippingOptions("shippingOptions")
             )
-        }
+
+        fun from(state: SavedStateHandle) =
+            PaymentParams(
+                methodNames = state["methodNames"] ?: emptyList(),
+                methodData = state.getMethodData("methodData"),
+                merchantName = state["merchantName"] ?: "",
+                topLevelOrigin = state["topLevelOrigin"] ?: "",
+                paymentRequestOrigin = state["paymentRequestOrigin"] ?: "",
+                total = state.get<String>("total")?.let(PaymentAmount::parse),
+                modifiers = state["modifiers"] ?: "[]",
+                paymentRequestId = state["paymentRequestId"] ?: "",
+                paymentOptions = PaymentOptions.from(state["paymentOptions"]),
+                shippingOptions = state.getShippingOptions("shippingOptions")
+            )
     }
 }

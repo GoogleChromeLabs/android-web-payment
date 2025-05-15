@@ -19,21 +19,21 @@ package com.example.android.samplepay.model
 import android.os.Bundle
 
 data class PaymentOptions(
-    val requestPayerName: Boolean,
-    val requestPayerPhone: Boolean,
-    val requestPayerEmail: Boolean,
-    val requestShipping: Boolean,
-    val shippingType: String
+    val requestPayerName: Boolean = false,
+    val requestPayerPhone: Boolean = false,
+    val requestPayerEmail: Boolean = false,
+    val requestShipping: Boolean = false,
+    val shippingType: String = "shipping"
 ) {
     companion object {
         fun from(extras: Bundle?): PaymentOptions {
-            return PaymentOptions(
-                requestPayerName = extras?.getBoolean("requestPayerName", false) ?: false,
-                requestPayerPhone = extras?.getBoolean("requestPayerPhone", false) ?: false,
-                requestPayerEmail = extras?.getBoolean("requestPayerEmail", false) ?: false,
-                requestShipping = extras?.getBoolean("requestShipping", false) ?: false,
-                shippingType = extras?.getString("shippingType", "shipping") ?: "shipping"
-            )
+            return extras?.let {
+                PaymentOptions(requestPayerName = it.getBoolean("requestPayerName", false),
+                    requestPayerPhone = it.getBoolean("requestPayerPhone", false),
+                    requestPayerEmail = it.getBoolean("requestPayerEmail", false),
+                    requestShipping = it.getBoolean("requestShipping", false),
+                    shippingType = it.getString("shippingType", "shipping"))
+            } ?: PaymentOptions()
         }
     }
 

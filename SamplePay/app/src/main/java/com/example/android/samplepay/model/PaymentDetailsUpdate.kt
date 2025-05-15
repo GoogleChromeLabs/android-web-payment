@@ -22,7 +22,7 @@ data class PaymentDetailsUpdate(
     val total: PaymentAmount?,
     val shippingOptions: List<ShippingOption>?,
     val error: String?,
-    val stringifiedPaymentMethodErrors: String?,
+    val paymentMethodErrors: String?,
     val addressErrors: AddressErrors?
 ) {
     companion object {
@@ -31,7 +31,7 @@ data class PaymentDetailsUpdate(
                 total = extras.getBundle("total")?.let { PaymentAmount.from(it) },
                 shippingOptions = extras.getShippingOptions("shippingOptions"),
                 error = extras.getString("error"),
-                stringifiedPaymentMethodErrors = extras.getString("stringifiedPaymentMethodErrors"),
+                paymentMethodErrors = extras.getString("stringifiedPaymentMethodErrors"),
                 addressErrors = extras.getBundle("addressErrors")?.let { AddressErrors.from(it) }
             )
         }

@@ -23,11 +23,11 @@ import androidx.lifecycle.SavedStateHandle
 import org.json.JSONException
 
 @Suppress("DEPRECATION", "UNCHECKED_CAST")
-private fun Bundle.getBundleArray(key: String): Array<Bundle>? {
-    return if (Build.VERSION.SDK_INT >= 33) {
-        getParcelableArray(key, Bundle::class.java)
+private fun Bundle.getBundleArray(key: String): List<Bundle>? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelableArray(key, Bundle::class.java)?.toList()
     } else {
-        getParcelableArray(key) as Array<Bundle>?
+        getParcelableArray(key)?.map {it as Bundle}
     }
 }
 

@@ -33,6 +33,8 @@ The project can be deployed to [Firebase Hosting](https://firebase.google.com/do
 2. Modify `SamplePay/gradle.properties` and change the domain name to yours.
 3. Run
 
+> **Note:** This payment app generates invalid responses to illustrate how the Payment Request API responds to incomplete payloads (e.g.: when a shipping address is not selected). Make sure that your payment objects are well formed before returning them back to the Web end.
+
 ## SampleMerchant
 
 The project can be deployed to [Firebase Hosting](https://firebase.google.com/docs/hosting).

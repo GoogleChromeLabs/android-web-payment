@@ -14,9 +14,9 @@ This is an Android payment app sample that works with Web PaymentRequest API.
 3. Click on "PAY" button.
 
 
-<table style="border: 0 solid transparent">
+<table>
   <tr>
-    <td style="vertical-align: top; border-right: 30px solid transparent">
+    <td>
 
 ## SampleMerchant
 
@@ -40,7 +40,7 @@ The project can be deployed to [Firebase Hosting](https://firebase.google.com/do
 
   </td>
   <td width="280">
-    <img src="payment-app-repo.gif" alt=""/>
+    <img src="payment-app-repo.gif" alt="Screencast of a complete payment flow using the applications in this repository"/>
   </td>
 </tr>
 </table>

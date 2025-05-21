@@ -14,7 +14,7 @@ This is an Android payment app sample that works with Web PaymentRequest API.
 3. Click on "PAY" button.
 
 
-<table>
+<table style="border: 0 solid transparent">
   <tr>
     <td style="vertical-align: top; border-right: 30px solid transparent">
 

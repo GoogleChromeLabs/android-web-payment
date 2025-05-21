@@ -76,6 +76,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -278,9 +279,7 @@ private fun AmountLabel(currency: String, value: String, modifier: Modifier = Mo
             text = stringResource(R.string.amount_label, currency, value),
             maxLines = 1,
             autoSize = TextAutoSize.StepBased(
-                minFontSize = 45.sp,
-                maxFontSize = 95.sp,
-                stepSize = 5.sp
+                minFontSize = 45.sp, maxFontSize = 95.sp, stepSize = 5.sp
             ),
             style = Typography.displayLarge.copy(
                 brush = Brush.linearGradient(
@@ -304,7 +303,8 @@ private fun PaymentFormTextField(
     placeholder: @Composable (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     textStyle: TextStyle = LocalTextStyle.current,
-    keyboardActions: KeyboardActions = KeyboardActions.Default
+    keyboardType: KeyboardType = KeyboardType.Unspecified,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
     TextField(
         colors = TextFieldDefaults.colors(
@@ -320,8 +320,8 @@ private fun PaymentFormTextField(
         modifier = modifier.height(54.dp),
         shape = RoundedCornerShape(16.dp),
         value = value.orEmpty(),
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            imeAction = ImeAction.Done, keyboardType = keyboardType
         ),
         keyboardActions = keyboardActions,
         maxLines = 1,
@@ -409,32 +409,39 @@ fun ContactForm(
 
         if (showName) {
             Spacer(modifier = modifier.height(dimensionResource(R.dimen.spacing_small)))
-            PaymentFormTextField(value = contactInfo.name, label = {
-                Text("Name")
-            }, onValueChange = {
-                contactInfo = contactInfo.copy(name = it)
-                onContactInfoChange(contactInfo)
-            })
+            PaymentFormTextField(
+                value = contactInfo.name,
+                label = {
+                    Text("Name")
+                },
+                onValueChange = {
+                    contactInfo = contactInfo.copy(name = it)
+                    onContactInfoChange(contactInfo)
+                },
+                keyboardType = KeyboardType.Text,
+            )
         }
 
         if (showPhoneNumber) {
             Spacer(modifier = modifier.height(dimensionResource(R.dimen.spacing_small)))
-            PaymentFormTextField(value = contactInfo.phoneNumber, label = {
+            PaymentFormTextField(
+                value = contactInfo.phoneNumber, label = {
                 Text("Phone number")
             }, onValueChange = {
                 contactInfo = contactInfo.copy(phoneNumber = it)
                 onContactInfoChange(contactInfo)
-            })
+            }, keyboardType = KeyboardType.Phone)
         }
 
         if (showEmailAddress) {
             Spacer(modifier = modifier.height(dimensionResource(R.dimen.spacing_small)))
-            PaymentFormTextField(value = contactInfo.emailAddress, label = {
+            PaymentFormTextField(
+                value = contactInfo.emailAddress, label = {
                 Text("Email address")
             }, onValueChange = {
                 contactInfo = contactInfo.copy(emailAddress = it)
                 onContactInfoChange(contactInfo)
-            })
+            }, keyboardType = KeyboardType.Email)
         }
 
         if (showShippingInfo) {

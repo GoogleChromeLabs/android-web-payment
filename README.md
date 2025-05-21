@@ -1,5 +1,3 @@
-android-web-payment
-===================
 
 This is an Android payment app sample that works with Web PaymentRequest API.
 
@@ -15,6 +13,38 @@ This is an Android payment app sample that works with Web PaymentRequest API.
 2. Open the Chrome browser and navigate to  https://sample-pay-ss.web.app
 3. Click on "PAY" button.
 
+
+<table>
+  <tr>
+    <td>
+
+## SampleMerchant
+
+The project can be deployed to [Firebase Hosting](https://firebase.google.com/docs/hosting).
+
+1. Install [Firebase CLI](https://firebase.google.com/docs/cli#install_the_firebase_cli).
+2. Create a new Firebase project.
+3. Edit `SampleMerchant/.firebaserc` and change the project ID to yours.
+4. Edit `SampleMerchant/public/index.html` and change the `supportedMethods` to your SamplePay's domain.
+5. Run `$ firebase deploy`.
+
+## SamplePay (Android)
+
+1. Import the project path (`SamplePay/`) to Android Studio.
+2. Modify `SamplePay/gradle.properties` and change the domain name to yours.
+3. Run
+
+
+
+> **Note:** This app generates invalid responses to show how the Payment Request API responds to incomplete payloads (e.g.: an empty shipping address). Make sure that your payment objects are well formed.
+
+  </td>
+  <td width="280">
+    <img src="payment-app-repo.gif" alt="Screencast of a complete payment flow using the applications in this repository"/>
+  </td>
+</tr>
+</table>
+
 ## SamplePay (Web)
 
 The project can be deployed to [Firebase Hosting](https://firebase.google.com/docs/hosting).
@@ -27,20 +57,4 @@ The project can be deployed to [Firebase Hosting](https://firebase.google.com/do
 6. Edit `SamplePay/firebase.json` and change the domain name to yours.
 6. Run `$ firebase deploy`.
 
-## SamplePay (Android)
 
-1. Import the project path (`SamplePay/`) to Android Studio.
-2. Modify `SamplePay/gradle.properties` and change the domain name to yours.
-3. Run
-
-> **Note:** This payment app generates invalid responses to illustrate how the Payment Request API responds to incomplete payloads (e.g.: when a shipping address is not selected). Make sure that your payment objects are well formed before returning them back to the Web end.
-
-## SampleMerchant
-
-The project can be deployed to [Firebase Hosting](https://firebase.google.com/docs/hosting).
-
-1. Install [Firebase CLI](https://firebase.google.com/docs/cli#install_the_firebase_cli).
-2. Create a new Firebase project.
-3. Edit `SampleMerchant/.firebaserc` and change the project ID to yours.
-4. Edit `SampleMerchant/public/index.html` and change the `supportedMethods` to your SamplePay's domain.
-5. Run `$ firebase deploy`.

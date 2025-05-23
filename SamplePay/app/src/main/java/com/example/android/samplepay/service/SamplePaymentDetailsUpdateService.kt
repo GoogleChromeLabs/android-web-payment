@@ -69,21 +69,33 @@ class SamplePaymentDetailsUpdateService : Service() {
          * @param appIdentity the identity that initiated the payment process.
          * @return the remote service to send updates back to the Web application.
          * @throws IllegalStateException if the identity that initiated the payment and delivered
-         *     the service don't match.
+         *     the service don't match, or an [UnsupportedCallerException] if the caller does not
+         *     support the `UPDATE_PAYMENT_DETAILS` needed for this application to run.
          */
         fun getUpdateService(appIdentity: ApplicationIdentity): IPaymentDetailsUpdateService? {
+
+            if (remoteCallerIdentity == null) {
+                throw UnsupportedCallerException("""
+                    The service that initiated the payment does not support the `UPDATE_PAYMENT_DETAILS` service, which is necessary to run this application. 
+                """.trimIndent()
+                )
+            }
+
             if (remoteCallerIdentity == appIdentity) {
                 return updateService
             }
 
             throw IllegalStateException("""
-                |Multiple callers are attempting to interact with this payment application.
-                |The identities of the application initiating the payment and receiving updates
-                |don't match.
-            """.trimMargin()
+                Multiple callers are attempting to interact with this payment application.
+                The identities of the application initiating the payment and receiving updates don't match.
+            """.trimIndent()
             )
         }
     }
 
     override fun onBind(intent: Intent?) = binder
 }
+
+/** A type to inform about support for the services required for callers of this payment app */
+class UnsupportedCallerException(message: String? = null, cause: Throwable? = null) :
+    IllegalStateException(message, cause)

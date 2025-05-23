@@ -24,6 +24,7 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.MutableCreationExtras
 import com.example.android.samplepay.R
@@ -36,8 +37,8 @@ class MainActivity : ComponentActivity() {
         factoryProducer = { PaymentViewModel.Factory },
         extrasProducer = {
             MutableCreationExtras(defaultViewModelCreationExtras).apply {
-                    set(PaymentViewModel.CALLING_PACKAGE_KEY, callingPackage)
-                }
+                set(PaymentViewModel.CALLING_PACKAGE_KEY, callingPackage)
+            }
         })
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +58,9 @@ class MainActivity : ComponentActivity() {
             PaymentApp(
                 payIntent = payIntent,
                 openErrorDialog = openErrorDialog.value,
+                errorMessage = messageResourceForResult(payResult)
+                    ?.let { stringResource(it) }
+                    .orEmpty(),
                 onErrorDismissed = {
                     openErrorDialog.value = false
                     cancel()
@@ -73,7 +77,8 @@ class MainActivity : ComponentActivity() {
                     setResult(RESULT_OK, (payResult as PaymentResult.ResultIntent).intent)
                     finish()
                 }
-                is PaymentResult.Error -> {
+
+                is PaymentResult.Error, PaymentResult.UnsupportedCaller -> {
                     openErrorDialog.value = true
                 }
             }
@@ -93,5 +98,11 @@ class MainActivity : ComponentActivity() {
     private fun cancel() {
         setResult(RESULT_CANCELED)
         finish()
+    }
+
+    private fun messageResourceForResult(result: PaymentResult) = when (result) {
+        is PaymentResult.Error -> R.string.error_multiple_callers
+        is PaymentResult.UnsupportedCaller -> R.string.error_caller_not_supported
+        else -> null
     }
 }

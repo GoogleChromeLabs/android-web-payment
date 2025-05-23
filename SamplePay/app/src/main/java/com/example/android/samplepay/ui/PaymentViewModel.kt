@@ -42,6 +42,7 @@ import com.example.android.samplepay.model.PaymentOptions
 import com.example.android.samplepay.model.PaymentParams
 import com.example.android.samplepay.model.ShippingOption
 import com.example.android.samplepay.service.SamplePaymentDetailsUpdateService
+import com.example.android.samplepay.service.UnsupportedCallerException
 import com.example.android.samplepay.util.getApplicationSignatures
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,8 +56,7 @@ import org.json.JSONObject
 private const val TAG = "PaymentViewModel"
 
 class PaymentViewModel(
-    private val application: Application,
-    private val state: SavedStateHandle,
+    private val application: Application, private val state: SavedStateHandle,
 
     /** The package that started the payment operation. */
     private val callingPackage: String?
@@ -102,8 +102,13 @@ class PaymentViewModel(
                     paymentDetailsUpdateService =
                         binder.getUpdateService(payIntentInfo.callingIdentity)
 
-                } catch (ise: IllegalStateException) {
-                    _paymentResult.update { PaymentResult.Error(ise) }
+                } catch (e: Exception) {
+                    _paymentResult.update {
+                        when (e) {
+                            is UnsupportedCallerException -> PaymentResult.UnsupportedCaller
+                            else -> PaymentResult.Error(e)
+                        }
+                    }
                 }
             }
         }
@@ -285,6 +290,7 @@ abstract class PaymentIntent {
 /** A representation of the result of the payment operation. */
 sealed class PaymentResult {
     data object None : PaymentResult()
+    data object UnsupportedCaller : PaymentResult()
     data class Error(val exception: Exception) : PaymentResult()
     data class ResultIntent(val intent: Intent) : PaymentResult()
 }

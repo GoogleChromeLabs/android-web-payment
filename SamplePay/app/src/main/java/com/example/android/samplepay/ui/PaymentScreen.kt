@@ -264,7 +264,7 @@ private fun PaymentSummary(
                 .padding(horizontal = dimensionResource(R.dimen.spacing_medium))
                 .fillMaxWidth()
         ) {
-            Text("Pay")
+            Text(stringResource(R.string.pay))
         }
     }
 }
@@ -274,7 +274,7 @@ private fun AmountLabel(currency: String, value: String, modifier: Modifier = Mo
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.fillMaxWidth()
     ) {
-        Text(text = "Total price:", style = Typography.labelLarge)
+        Text(text = stringResource(R.string.total_price), style = Typography.labelLarge)
         BasicText(
             text = stringResource(R.string.amount_label, currency, value),
             maxLines = 1,
@@ -402,7 +402,7 @@ fun ContactForm(
 
     Column(modifier = modifier.padding(horizontal = dimensionResource(R.dimen.spacing_medium))) {
         Text(
-            text = "Contact information",
+            text = stringResource(R.string.contact_information),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.secondary
         )
@@ -412,7 +412,7 @@ fun ContactForm(
             PaymentFormTextField(
                 value = contactInfo.name,
                 label = {
-                    Text("Name")
+                    Text(stringResource(R.string.name))
                 },
                 onValueChange = {
                     contactInfo = contactInfo.copy(name = it)
@@ -426,7 +426,7 @@ fun ContactForm(
             Spacer(modifier = modifier.height(dimensionResource(R.dimen.spacing_small)))
             PaymentFormTextField(
                 value = contactInfo.phoneNumber, label = {
-                Text("Phone number")
+                Text(stringResource(R.string.phone_number))
             }, onValueChange = {
                 contactInfo = contactInfo.copy(phoneNumber = it)
                 onContactInfoChange(contactInfo)
@@ -437,7 +437,7 @@ fun ContactForm(
             Spacer(modifier = modifier.height(dimensionResource(R.dimen.spacing_small)))
             PaymentFormTextField(
                 value = contactInfo.emailAddress, label = {
-                Text("Email address")
+                Text(stringResource(R.string.email_address))
             }, onValueChange = {
                 contactInfo = contactInfo.copy(emailAddress = it)
                 onContactInfoChange(contactInfo)

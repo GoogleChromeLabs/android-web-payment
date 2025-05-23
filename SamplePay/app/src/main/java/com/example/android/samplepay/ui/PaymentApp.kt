@@ -92,15 +92,15 @@ fun DefaultScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SecurityErrorDialog(openDialog: Boolean, onDismissed: () -> Unit) {
+fun SecurityErrorDialog(openDialog: Boolean, errorMessage: String, onDismissed: () -> Unit) {
     if (openDialog) {
         AlertDialog(title = {
-            Text(text = "Security error")
+            Text(text = stringResource(R.string.error))
         }, text = {
-            Text(text = "This payment app is being called by multiple applications, which is not supported by this provider.")
+            Text(text = errorMessage)
         }, onDismissRequest = onDismissed, dismissButton = {
             TextButton(onClick = onDismissed) {
-                Text("Dismiss")
+                Text(stringResource(R.string.dismiss))
             }
         }, confirmButton = {})
     }

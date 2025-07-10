@@ -138,9 +138,9 @@
                 log.e(e.message);
               });
           }
-          if (request.hasEnrolledInsrument) {
+          if (request.hasEnrolledInstrument) {
             request
-              .hasEnrolledInsrument()
+              .hasEnrolledInstrument()
               .then(function (result) {
                 log.d(result ? 'Has enrolled instrument' : 'No enrolled instrument')
               })
